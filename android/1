@@ -1,0 +1,278 @@
+新建项目： Empty Activity
+
+找到项目中的：
+
+project ->
+
+main -》
+
+res -》 layout - 》 activity_main.xml
+
+ 在这里，我们可以看到：可以直接图形化观看页面效果，也可以使用xml代码
+
+.gradle 和 . idea 都是平台自动生成的文件，一点不用管，我们将代码打包发给别人的时候，通常也是先删掉这两个文件再打包
+
+.bat文件，是在windows系统中使用的文件
+
+local.properties文件，其中定义了安卓SDK的路径。  
+
+settings.gradle 是定义了我们导入的模块
+
+，在大规模开发时很有用
+
+app文件中的build文件是类似于idea中的bin文件，发送代码时也是通常将其删掉再打包
+
+app文件：
+
+​	libs文件： 存放需要导入的第三方jar包
+
+​    AudroidManifest.xml文件，一个总的控制文件，类似于小程序中的app.json 文件
+
+我们的一切activity都需要在这里注册
+
+ build.gradle,用于关联依赖第三方库
+
+ res：
+
+drawable : 图片放置文件夹
+
+layout ： 布局文件的放置，布局文件为xmlw文件
+
+mipmap-  图标的放置
+
+values: 颜色 ， 字符串  ， 主题 
+
+# 控件:
+
+## TextView:
+
+基础属性：
+
+layout_width 
+
+layout_height ：
+
+“match_parent"
+
+"wrap_content"
+
+"200dp"
+
+
+
+id :
+
+"@+id/tv_one",前面是格式，后面是名字
+
+text：
+
+"收到回复",   .setText("fdfsds")
+
+textColor:
+
+"#00000000",每两个数字一组，共四组，第一组是透明度，后三组是rbg
+
+textStyle:norma,bold , italic(斜体)
+
+textSize：单位一般为sp;
+
+background:为背景设置颜色，"#00000000"
+
+也可以是图片
+
+gravity ： 设置空间中内容的对齐方向，
+
+"center_vertical","center_horizontal"
+
+TextView中是文字，ImageView中是图片
+
+控件都需要放置在容器中
+
+每一个属性都可以长按Ctrl+点击查看它的源码定义，进而知道它的值都有啥
+
+正式开发时string和color都应该放在values中的对应XML文件中，再调用它；
+
+<string name = "tv_one" >想学</string>
+
+android : text = "@string/tv_one"
+
+<color name = "red" >#FFFF0000</color>
+
+<TextView 
+
+android:id ="@+id/tv_one"
+
+android : text = "@stirng/tv_one"
+
+/>
+
+
+
+带阴影的TextView
+
+shadowColor : 设置阴影的颜色
+
+shadowRadius ： 设置阴影的模糊度。当为0.1时，和原字体完全相同(除颜色外)，建议为3.0，此时模糊效果正好
+
+shadowDx： 水平方向的偏移
+
+"10.0"
+
+shadowDy: 垂直方向的偏移
+
+"10.0"
+
+实现跑马灯的效果
+
+singleLine : 内容单行显示
+
+focusable ： 是否可以获取焦点
+
+true
+
+focusableInTouchMode :用于控制试图在触摸模式下是否可以聚焦
+
+true
+
+ellipsize:在哪里可以省略文本（文字单行显示明显空间不足）
+
+“marquee” ，指跑马灯形式，“start”指省略号在前面。。”end“ 指省略号在后面
+
+marqueeRepeatLimit ： 字幕动画重复次数
+
+“marquee_forever" 永久跑下去
+
+属性设置好后，想要炮马灯，还需要最关键的一步： 获取焦点，;
+
+三种方法：
+
+1，啥也不干，运行后点文字一下，纯手动聚焦
+
+显然不好，一般的预期效果肯定是让它自己自动一直跑
+
+2，自定义一个MyTextView类，并继承TextView，就写在Java文件夹下的代码包里。
+
+然后XML中调用时：
+
+<com.MyTextView
+
+   android: id = "@+id/tv_one"
+
+  ...
+
+/>
+
+在MyTextView类中，无脑覆写构造函数后，
+
+覆写方法：
+
+public  void  isFocused(){
+
+return true;
+
+}
+
+第三种方法：
+
+<TextView  ...>
+
+<requestFocus/>     //用这句话请求焦点
+
+</TextView>
+
+
+
+
+
+## Button ：
+
+ Button继承自TextView	·
+
+StateListDrawable是Drawable资源的一种，可以根据不同的状态这支不同的图片效果，关键节点是<selector>，我们只需要将Button的background属性设置为该drawable资源即可轻松实现，按下按钮时实现不同的颜色或背景
+
+drawable： 引用的Drawable位图
+
+state_focused：是否获得焦点
+
+state_pressed:空间是否被按下
+
+state_enabled:组件是否可用
+
+state_selected:组件是够被选中，针对有滚轮的情况
+
+state_checked:控件是够被勾选
+
+state_checkable:组件是够可被勾选
+
+
+
+<Button
+
+android : text  = "我是按钮"
+
+android ：background = "@color/black"
+
+//最新版的设定是仅在drawable文件夹中的图片选择器有效和color中的颜色选择器有效，如果想使用直接的单颜色，需要在theme文件中将parent的属性值更改为新增.bridge
+
+导入drawable的图片：
+
+右击res文件夹-》点击Vector Asset->点击Clip Art 的图标-》-》
+
+导入成功后，图标/图片将以xml文件的形式储存在drawable文件夹里面
+
+/>
+
+btn_selector.xml 文件：
+
+<selector ...>
+
+<item android : id : drawable = "@drawable/ic_sss" andorid : state_pressed = "true"/>
+
+<item android : id : drawable = "@drawable/ic_aaa"/>
+
+</selector>
+
+按中时为第一张图片，松手时为第二张默认图片
+
+android : background = "@drawable/btn_selector"
+
+background只能设置drawable图片选择器，
+
+android ： backgroundTint用来设置颜色选择器
+
+backgroundTint 可以直接设置单一的颜色。
+
+也可以设置颜色选择器
+
+先在res文件夹目录下新建一个color新文件夹
+
+在右击color文件夹新建叫做color ResourceFile 
+
+的XML文件
+
+ btn_color_selector.xml
+
+<selector ...>
+
+<item android:color = "#ffff0000" android :state _pressed = "true"/>\
+
+<item android : color = "#ffooffoo"/>
+
+</selector>
+
+
+
+android : backgroundTint = "@color/btn_color_selector"
+
+android : foreground 是用来设置前景色的，这个设置会把字体的颜色覆盖掉，用的不多，用法和backgroundTint一样
+
+背景色---字体----前景色
+
+### button事件处理
+
+：
+
+- 长按事件
+- 点击事件
+- 触摸事件
+
