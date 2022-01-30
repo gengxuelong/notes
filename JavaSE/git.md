@@ -1,6 +1,6 @@
 # git
 
-## git的基本操作
+## 1.git的基本操作
 
 ### git本地仓库基本工作流程
 
@@ -244,7 +244,7 @@ GitHub，码云gitee
 
 生成SSH 公钥的命令：
 
-> $ ssh -keygen -t rsa -C "3349495429@qq.com"
+> $ ssh-keygen -t rsa -C "3349495429@qq.com"  // ssh-keygen 是连着的
 >
 > ....
 >
@@ -286,7 +286,7 @@ GitHub，码云gitee
 
 - 命令：
   - git remote add 远程名称 远程仓库URL      //自定义仓库名称
-  - git push -U 仓库名称 分支名   //推送，同时明确要提交哪一个分支的代码
+  - git push -u 仓库名称 分支名   //推送，同时明确要提交哪一个分支的代码
 
 >$git remote add origin（任意起名） URL(去gitee网上赋值，HTTPS 和 SSH都行)               // 本命令是为远程仓库起一个名称
 >
@@ -335,7 +335,7 @@ GitHub，码云gitee
 
 ​	
 
-### 代码冲突：
+### 代码冲突
 
 两个程序员拉取了（pull）同一个文件，并分别对文件进行了修改。然后分别进行了push推送。造成了两个文件的内容冲突。
 
@@ -368,4 +368,67 @@ A程序员将test文件修改一下，并且push到远程仓库。而B程序员�
 > $git push -u origin master
 
 所以为了应对代码冲突，执行提交之前一定要进行一个拉取动作，之后所有有冲突的文件都会显示出感叹号，并且内部会保留您的和远程的两方面的信息。你自己决定留那些，删哪些，不论怎么修改，只要拉取过，就会提交成功
+
+## 2.IDEA 集成 git
+
+### 创建本地仓库-提交代码
+
+1. file  --> version control  --> git 
+
+   进入git设置后，在git目录栏中找到git的安装目录中的git.exe；
+
+   再点击test用来验证git是否配置好了
+
+2. 配置好后的使用步骤
+
+   - 点击VCS ,,点击import into version control，，点击create git repository
+   - 控制目录选择：选择下面带有.idea的那一层目录。
+   - 此时多出了两个按钮，一个蓝的的下降符号，一个绿色的对钩符号。下降是pull操作，对钩是commit操作
+   - 点击对钩   提交：
+     - 勾选要提交的文件，勾选的动作就是add，然后输入注释信息，然后点击commit提交
+
+   - 观看提交记录:点击下方的version control。
+
+### 版本切换
+
+  有两种方式：
+
+- 方式一：reset
+  - 进入version control的log中，右击任意版本，点击reset ..，--》点击reset;;
+  - 进入该版本后，此版本之后的新版本都直接销毁（无奈，但没办法）
+
+- revert commit
+
+  - 同样的进入log后，点击之前的版本，右键，点击revert commit，此时当前版本和欲进入版本之间不一样的文件都会爆红色。
+
+  - 出现的状况可以理解为代码冲突，只要最后取舍中选择与进入版本的代码就好了
+
+  - 点击merge
+
+  -  初始化状态就是与进入版本为结果端，当前版本为参看端，只要什么也不该，把叉号就点一下，再点击APply就好了
+
+  - 进入提交界面，既revert这个行为会作为一个版本进入历史仓库
+
+  - 内容都自动弄好了，点击commit即可
+
+    
+
+### idea中对远程仓库的操作
+
+- 本地推送到远程
+  - 点击VCS ，点击git，点击push，
+  - 点击define remote
+  - 起名字并输入URL
+  - 点击push即可推送成功
+
+- 把远程仓库中的diamante克隆到本地
+  - 点击file---》点击Close project
+  - 此时退出当前项目并进入最开始的新建项目的页面
+  - 点击check out from version control
+  - 点击git
+  - 输入URL
+  - 选择clone的代码放在哪里
+  - 点击clone
+  - 然后一路next
+  - clone下来的代码也能看到以前版本控制的信息
 
