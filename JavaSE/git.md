@@ -298,6 +298,58 @@ GitHub，码云gitee
 >
 >$ 
 
+于是我就用`git push -f origin master`强制push就成功了。（注意：大家千万不要随便用-f的操作，因为f意味着强制push，会覆盖掉远程的所有代码！）
+
+
+
+#### 问题1：
+
+fatal: refusing to merge unrelated histories
+
+解决：
+
+```
+$git pull origin master --allow-unrelated-histories
+```
+
+#### 问题2：
+
+Updates were rejected because the tip of your current branch is behind
+
+描述：出现这个错误的原因是git本地仓库的当前版本低于远程仓库的版本(大白话就是：你在[github](https://so.csdn.net/so/search?q=github&spm=1001.2101.3001.7020)上进行的修改没有同步到本地git仓库中)。
+
+解决：
+
+git pull origin master
+
+#### 问题3
+
+ Your local changes to the following files would be overwritten by merge
+
+解释：
+
+这句代码的意思是以本地进行的修改会被覆盖，也就是说你本地进行的修改不会生效。一般是使用了git pull相关的命令同步远程仓库到本地引起的，而本地的修改无法上传到远程仓库，导致两者都不能兼备
+
+解决：
+
+git stash  # 备份当前的工作区的内容，让工作区保证和上次提交的内容一致。同时，将当前的工作区内容保存到Git栈中
+git commit
+git stash pop  # 从Git栈中读取最近一次保存的内容，恢复工作区的相关内容
+在终端下依次输入上述代码就可以让服务器上的代码更新到了本地，而且你本地修改的代码也没有被覆盖
+之后使用add，commit，push命令即可更新本地代码到服务器
+
+#### 问题4：
+
+昨天还可以git push代码到远程仓库，今天git  push时报了这个错：fatal: unable to access 'https://github.com/.......': OpenSSL SSL_read: Connection was reset, errno 10054
+
+分析与解决：
+
+一般是这是因为服务器的SSL证书没有经过第三方机构的签署，所以才报错
+
+参考网上解决办法：解除ssl验证后，再次git即可
+
+git config --global http.sslVerify "false"
+
 ### 远程仓库操作-克隆，拉取
 
 - 操作情况：现有远程仓库，本地仓库为空
