@@ -197,6 +197,16 @@ checkout 切换分支，在本地历史仓库切换一下分支，工作目录�
 
 还有就是版本切换
 
+
+
+> Git鼓励大量使用分支：
+> 查看分支：git branch
+> 创建分支：git branch <name>
+> 切换分支：git checkout <name>
+> 创建+切换分支：git checkout -b <name>
+> 合并某分支到当前分支：git merge <name>
+> 删除分支：git branch -d <name>
+
 ### 远程仓库的工作流程
 
 远程仓库，就是一个代码托管平台
