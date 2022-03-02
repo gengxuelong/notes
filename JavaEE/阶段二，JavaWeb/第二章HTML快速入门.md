@@ -762,7 +762,7 @@ css层叠样式表，可以为HTML元素添加一些样式
 
 ## css 基本语法：
 
-css的引入方式：
+#### css的引入方式：
 
 1. 内联样式，在标签中通过style属性引入，（属性值均需要有双引号）。只能控制当行标签
 
@@ -774,7 +774,7 @@ css的引入方式：
    >
    > 引入格式：
    >
-   > ​	<link src = "stylesheet" href = "css文件路径">
+   > ​	<link rel = "stylesheet" href = "css文件路径">
 
 举例：
 
@@ -1010,13 +1010,13 @@ css的注释可以在css文件中写，也可以在style标签中写
   - underline 下划线
   - overline 上划线
   - line-through  删除线
-- text-align   水平对齐方式
+- text-align   文字水平对齐方式
   - left  居左
   - center  居右
   - right 居右
 - line-align  行间距、行高
   - 像素点 20px
-- vertical-align  垂直对齐方式  
+- vertical-align 文字垂直对齐方式  
   - top 居上
   - bottom  居下
   - middle 居中
@@ -1219,4 +1219,396 @@ css的盒子模型 是重点
 - td 
   - 单元格标签（列标签） 
   - 属性
-    - 
+    - rowspan  合并行
+    - colspan  合并列
+
+- th  表头标签（自带加粗和居中）
+- thead  表头语义标签
+- tbody   标体语义标签
+- tfoot 标脚语义标签
+
+实现表格:
+
+```html
+<table width= "400px" border = "1px" align = "center"  >//align 是报个居中显示
+    <tr>
+    	<th>姓名</th>
+        <th>性别</th>
+        <th>年龄</th>
+        <th>数学</th>
+        <th>语文</th> 
+    </tr>
+    
+    <tr align = "center">
+    	<td>张三</td>
+        <td rowspan = "2">男</td>
+        //张三的性别占了两行，下面的哪一个格子注释掉
+        <td>23</td>
+        <td colspan = "2">90</td>
+      <!--  <td>90</td>  -->
+    </tr>
+    
+    <tr align = "center">
+    	<td>李四</td>
+       <!-- <td>男</td> -->
+        <td>24</td>
+        <td>99</td>
+        <td>93</td>
+    </tr>
+    
+    
+</table>
+```
+
+语义化标签：head body  html也都是语义化标签
+
+表格的语义化标签没啥用，只有标识作用。遇到认识就好
+
+### 样式控制
+
+样式名称    作用   属性值
+
+- background-repeat   控制背景重复
+  - no-repeat   不重复
+  - repeat-x 水平重复
+  - repeat-y  垂直重复
+  - repeat  水平+垂直重复
+
+- outline  控制轮廓   
+  - double  双实线
+  - dotted  圆点
+  - dashed   虚线
+  - none    无
+- display    控制元素
+  - inline   内联元素（无换行，无长宽）
+  - block  ：块级元素 （有换行）
+  - inline-block :内联元素（有长宽）
+  - none ： 隐藏元素 
+
+```html
+<head>
+<style>
+	//背景图片重复
+    body{
+        background : url("../img/bg.jpg");
+        backgorund-repeat : repeat-x;
+        //默认为repeat
+    }
+    //轮廓的控制,轮廓就是边框状态.input输入状态下闪动的也是轮廓
+    input{
+        outline : double;
+    }
+    //元素显示的控制
+    div{
+        display : inline ;// 将div从块级元素变为内联元素。inline不能设置长和宽。none表示无法显示
+    }
+</style>
+    
+</head>
+<body>
+    用户名：<input type = "text"/>
+    <div>
+        春季
+    </div>
+    <div>
+        夏季
+    </div>
+    <div>
+        秋季
+    </div>
+    <div>
+        冬季
+    </div>
+</body>
+```
+
+### 盒子模型--css的灵魂
+
+万物皆盒子
+
+盒子模型：是通过设置边框和元素内容的边距，从而实现布局的方式。分为内边距和外边距两种方式。
+
+外边距：
+
+- margin-top    上外边距  
+  - margin-top : 50px;
+- margin-left   
+- margin-right
+- margin-bottom
+- margin  通用上下作用外边距
+  - margin ： 50px;
+- margin   单独  上右下左   外边距
+  - margin ： 70px 34px 30px 65px;
+- margin  自动计算外边距并水平居中
+  - margin ： auto;
+
+```html
+<head>
+    <style>
+        .wai{
+            border : 1px solid red;
+            width : 200px;
+            height : 200px;
+            //内边距。设置内边距会导致外框的变化非常不方便。通产选择设置外边距
+        }
+        .nei{
+            border : 1px solod blue;
+            width : 100px;
+            height : 100px;
+            //设置外边距
+            margin-top : 50px;
+            margin-left : 50px;
+            margin-right : 50px;
+            margin-bottom : 50px;
+            
+            margin : 50px;
+            
+            margin : 50px 50px 50px 50px;  // 上右下左
+            
+            
+            
+           
+        }
+    </style>
+</head>
+<body>
+    <div class = "wai">
+        <div class = "nei">
+            
+        </div>
+    </div>
+</body>
+```
+
+
+
+内边距：padding  ...  形式和margin一模一样
+
+### 登录页面案例的实现-顶部图片和表单的实现
+
+1. 创建一个HTML文件
+2. 创建三个div标签划分区域（顶部公司图标，中间表单，底部页脚）
+3. 在顶部div标签中用img标签引入图片
+4. 在中间表单div标签中通过表单标签和表格标签填充表单项
+5. 设置样式（背景图片、背景色、宽度、外边距、弧度、文字水平对齐）
+
+```html
+<head>
+  <link rel = "stylesheet" href = "../css/login.css"/>
+</head>
+<body>
+    //顶部公司图标
+    <div>
+        <img src = "../img/logo.png"/>
+    </div>
+    //中间表单
+	<div class = "middle">
+        <form action = "#" method = "get"  autocomplete = "off">
+            <table width = "100%">
+                <thead>
+                <tr>
+                	<th colspan = "2">账&nbsp;密&nbsp;登&nbsp;录<hr/></th>
+                </tr>
+                </thead>
+                <tbody>
+               		<tr>
+                    	<td></td><label for = "usernam">账号</label>
+                        </td>
+                <td>
+                	<input type = "text" id = "username" name = "username" placeholder = "请输入账号" required/>    
+                </td>
+                    </tr>
+            
+            <tr>
+                   
+                    	<td></td><label for = "usernam">密码</label>
+                        </td>
+                <td>
+                	<input type = "text" id = "username" name = "username" placeholder = "请输入密码" required/>    
+                </td>
+                    </tr>
+    <tr colspan = "2">
+    	<button type = "submit">
+            确&nbsp;定
+        </button>
+    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    //底部页脚
+    <div>
+        
+    </div>
+</body>
+```
+
+```css
+body{
+   background : url("../img/bg.png");
+}
+.center{
+    background : white;
+     width : 40%;
+    margin : auto;
+    margin-top : 100px;
+    border-radius : 15p;
+    text-aligin : center;	
+}
+
+```
+
+### 中间表单样式的实现
+
+1. 设置表头样式（字体大小，颜色）
+2. 设置表体提示躺尸（问题大小）
+3. 设置表体输入筐样式（表框，弧度，宽度，高度，背景色，字体颜色，字体大小）
+4. 设置表行样式（行高）
+
+```css
+thead th {
+    font-size : 30px;
+    color : orangered;
+}
+tbody label{
+    font-size : 20px;
+    
+}
+tbody input {
+    border : 1px solid grey;
+    border-radius : 5px;
+    width : 90%;
+    height : 40px;
+    outline : none;
+}
+tr{
+    line-height : 60px;
+}
+tfoot button{
+    border : 1px solid srimson;
+    border-radius : 5px;
+    width : 95%;
+    height : 40%;
+    background : crimson;
+    color : white;// 文字颜色
+    font-size: 20px;
+}
+```
+
+### 底部页脚的实现
+
+1. 在底部页脚div标签中通过文字和a标签实现超链接
+
+2. 设置底部页脚样式（宽度，外边距，字体大小，字体颜色）
+
+3. 设置超链接样式（去除下划线，超链接文字颜色）
+
+4. 在案例以头条页面登录超链接中引入跳转登录页面
+
+   ```html
+   <div class= "footer">
+       <br/><br/>
+       登录/注册既表示您统一&nbsp;&nbsp;
+       <a href = "#" target = "_blank">隐私条款</a>&nbsp;&nbsp;&nbsp;&nbsp;
+       <a href = "#" target = "_blank">忘记密码？</a>
+       
+    </div>
+   ```
+
+   ```css
+   //底部页脚
+   .footer {
+       width : 35%;
+       margin : auto ; //自动水平居中
+       font-size : 15px;
+       color : grey;
+   }
+   a{
+      text-decoration : none;
+       color : blue;
+   }
+   ```
+
+   css的核心作用就是美化页面
+
+### Nginx的介绍和安装
+
+什么事Nginx：
+
+- Nginx是一款服务器软件
+- 其核心功能时可以和服务器硬件相结合，从而可以将程序发布到Nginx服务器上，让很多用户浏览
+
+帮助我们发布网站。在同一个局域网内可以相互访问，如果想要通过外网访问，需要购买域名
+
+安装Nginx步骤：
+
+1. 进入CRT（并连接Linux）
+2. 点击Alt+t  进入sftp路径
+3. put  d:/.....   安装包的路径（在资源包里）
+4. 然后进入Linux控制台（刚切换和控制台）进入管理员模式
+5. 进入主界面：cd ~
+6. ls 展示主界面内容
+7. 然后 mv nginx-1.17.5.tar.gz  /home/
+8. cd  /home/
+9. ls 
+10. tar -zxvf nginx-1.17.5.tar.gz  
+11.  cd ngnix-1.17.5
+12. ls
+13. yum  -y install pcre pcre-devel
+14. yum -y install zlib-devel 
+15. yum -y install openssl openssl-devel
+16. ls
+17.    ./configure
+18. make
+19. make install
+20. cd /usr/local/nginx/
+21. ls
+22. pwd
+23. ls
+24. cd sbin
+25. ls
+
+#### 启动Nginx
+
+- cd /usr/local/nginx/sbin
+- ./nginx    启动
+- ./nginx -s stop   停止
+- ./nginx -s reload   重启
+
+启动后查看Nginx服务状态
+
+- ps -ef | grep nginx
+
+​	连接测试
+
+通过浏览器：
+
+http://ip地址（：80	）   //Linux的ip地址
+
+### 案例发布
+
+步骤：
+
+1. 在/home下创建一个toutiao目录： mkdir toutioa
+
+2. 将项目上川岛该目录下： put d:/web.zip
+
+3. 解压项目压缩包 ： unzip web.zip
+
+4. 编辑Nginx配置文件 vi /home/nginx-1-17.5/conf/nginx.conf
+
+   - 找到server的大括号范围，修改location的路径
+
+   - 既： 
+
+   - > root  /home/toutiao
+
+5. 关闭Nginx服务 ./nginx -s stop 
+
+6. 关闭后启动Nginx服务并加载配置文件：
+
+   > /usr/local/nginx/sbin/nginx -c /home/nginx-1.17.5/conf/nginx.conf 
+
+7. 通过浏览器测试网站：
+
+   http://192.222.222.222

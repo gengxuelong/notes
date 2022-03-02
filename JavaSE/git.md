@@ -360,6 +360,17 @@ git stash pop  # 从Git栈中读取最近一次保存的内容，恢复工作区
 
 git config --global http.sslVerify "false"
 
+#### 问题5
+
+克隆时： error: RPC failed; curl 28 OpenSSL SSL_read: Connection was reset, errno 10054
+fatal: expected flush after ref listing
+
+解决方法:
+
+```shell
+git config http.sslVerify "false"
+```
+
 ### 远程仓库操作-克隆，拉取
 
 - 操作情况：现有远程仓库，本地仓库为空
