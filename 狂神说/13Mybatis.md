@@ -77,7 +77,7 @@ Dao 层    Service层     Controller层
 
 思路： 搭建环境-》 导入Mybatis -》 编写代码 -》 测试
 
-### 2.1
+### 2.1 创建父模块
 
 SQL语句： 
 
@@ -107,12 +107,69 @@ SQL语句：
 2. 删除src目录，成为一个父工程
 3. 导入maven依赖，两个必须的依赖： mysql驱动，Mybatis    ，还有junity。都在Maven仓库里面。用xml标签让程序自己加载
 
-### 2.2创建一个模块
+### 2.2创建另一个模块
 
 new一个module，
 
 这个模块自动是第一个建立模块的子模块。这是我们想要的结果
 
 - 编写Mybatis的核心配置文件
+
+  - 在子模块的resource目录下新建xml文件： Mybatis-config.xml ：
+
+    - 里面将Mybatis官网下的配置代码粘贴到这里面即可。
+
+    - > ```xml
+      > <?xml version="1.0" encoding="UTF-8" ?>
+      > <!DOCTYPE configuration
+      >   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+      >   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+      > <configuration>
+      >     
+      >   <environments default="development">
+      >     <environment id="development">
+      >       <transactionManager type="JDBC"/>
+      >       <dataSource type="POOLED">
+      >         <property name="driver" value="com.mysql.jdbc.Driver"/>
+      >         <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL = true &amp; useUnicode = true &amp; characterEncoding = UTF-8"/>
+      >         <property name="username" value="root"/>
+      >         <property name="password" value="root"/>
+      >       </dataSource>
+      >     </environment>
+      >   </environments>
+      >  
+      > </configuration>
+      > ```
+
 - 编写Mybatis的工具类
-- 
+
+com.kuang.dao包
+
+com.kuang.utils包
+
+在utils 包下： 
+
+```java
+//sqlSessionFactory --> sqlSession
+public class MybatisUtils {
+    private static SqlSessionFactory sqlSessionFactory;
+    static{
+        try{
+            //使用Mybatis的第一步，获取sqlSessionFactory 的对象
+            String resource = 'mybatis-config.xml';
+            InputStream inputStream = Resources.getResourceAsStream(resource);
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+        }catch (IOexception e){
+            e.printStackTrace();
+        }
+        
+        //既然有了SqlSessionFactory ,顾名思义，我们就可以得到SqlSession 的实例了。Sqlsession完全包含了面向数据库执行了SQL命令所需的方法。
+        public static SqlSession getSqlSession() {
+            return SqlSessionFactory.openS
+        }
+    }
+}
+```
+
+
+
