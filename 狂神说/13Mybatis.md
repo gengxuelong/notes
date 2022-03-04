@@ -314,3 +314,184 @@ try{
 SqlSession.close();
 
 }
+
+
+
+Maven项目pom.xml的规范词：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>Mybatis_6</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>Mybatis_6</name>
+    <packaging>war</packaging>
+    
+    
+    <dependencies>
+    
+        
+        
+    </dependencies>
+    
+    <build>
+    
+        
+    </build>
+    
+    
+    
+</project>
+```
+
+## 3.增删改查的实现
+
+所有的操作只和接口陪配置文件有关，
+
+### 1.namespace  : 接口类全名（用.)
+
+namespace中的包名要和mapper接口的包名完全一致
+
+### 2.select 
+
+选择，查询语句，和数据库中的SQL语言中的select一模一样
+
+- id ： 就是对应的namespace中的方法名
+- resultType就是Sql语句的返回值的类型，要么是基本类型，要么就是class 
+- parameterType :  参数类型
+
+在Mapper中：
+
+```java
+public interface UserMapper{
+    //查询全部用户
+    List<User> getUserList();
+    //根据id查询用户
+    User getUserById(int id);
+}
+```
+
+在xml实现文件中：
+
+```xml
+<select id = "getUserById" resultType = "com.gxl.pojo.User" parameterType = "int">
+		select * from mybatis.user where id=#{id}     // #{id} 指的是你接口方法参数叫做“id”，这样就可以动态表示你所输入的id值了
+</select>
+```
+
+测试类：
+
+仍然在UserDaoTest类中：
+
+```java
+public class UserDaoTest{
+    @Test
+    public void getUserByid(){
+        SqlSession sqlSession = MybatisUtils.getSqlSession();
+        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+        User user = userMapper.getUserById();
+        println(user);
+        
+        sqlSession.close();
+    }
+}
+```
+
+一个方法对应一个SQL语句
+
+### insert一个用户：
+
+```java
+//insert 一个用户，Mapper中
+public int addUser(User user);
+```
+
+```xml
+//对象中的属性可以直接取出来
+<insert id = "addUser" parametertype = "com.gxl.pojo.User"> //insert没用返回类型的属性
+	insert into mybatis.user(id,name,pwd) values (#{id},#{name},#{pwd});
+</insert>
+```
+
+测试：
+
+```java
+//增删改需要提交事务
+@Test
+public void addUser(){
+    SqlSession sqSession = MybatisUtils.getSqlSession();
+    UserMappper userMpper = sqlSession.getMapper(UserMapper.class);
+    int number = userMapper.addUser(new User(12,"haha","2020"));
+    if(number >0）{
+        System.out.println("增加成功");
+    }
+    //提交事务
+       sqlSession.commit();
+       
+    
+    sqlSession.close();
+}
+```
+
+### 修改用户
+
+```java 
+int updateUser(User user);
+```
+
+```xml
+<update id = "updateUser" parameterType = "com.gxl.pojo.User">
+	update mybatis.user set name = #{name},pwd = #{pwd} where id = #{id};  //;可有可无
+</update>
+```
+
+测试：
+
+```java
+ SqlSession sqSession = MybatisUtils.getSqlSession();
+    UserMappper userMpper = sqlSession.getMapper(UserMapper.class);
+    int number = userMapper.update(new User(12,"heihei","2020"));
+    if(number >0）{
+        System.out.println("增加成功");
+    }
+    //提交事务
+    sqlSession.commit();
+    sqlSession.close();
+```
+
+### 删除一个用户
+
+```java
+int deleteUser(int id);
+```
+
+```xml
+<delete id = "deleteUser" parameteType = "int">
+	delete from mybatis.user where id = #{id};
+</delete>
+```
+
+测试
+
+```java
+ SqlSession sqSession = MybatisUtils.getSqlSession();
+    UserMappper userMpper = sqlSession.getMapper(UserMapper.class);
+    int number = userMapper.deleteUser(1);
+    if(number >0）{
+        System.out.println("增加成功");
+    }
+    //提交事务   非常重要
+     sqlSession.commit();
+       
+    
+    sqlSession.close();
+```
+
+ 总： insert delete update select ,增删改查   CRUD
+
+编写接口 ，编写xml和SQL，编写测试
+

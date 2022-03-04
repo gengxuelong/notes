@@ -51,3 +51,11 @@ Ctrl+ l ,选择整行
 
 \```     + java
 
+ 
+
+
+
+### idea 返回值引用快速生成：
+
+Ctrl + shift + v
+
