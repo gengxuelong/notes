@@ -413,7 +413,7 @@ public int addUser(User user);
 ```xml
 //对象中的属性可以直接取出来
 <insert id = "addUser" parametertype = "com.gxl.pojo.User"> //insert没用返回类型的属性
-	insert into mybatis.user(id,name,pwd) values (#{id},#{name},#{pwd});
+	insert into mybatis.user (id,name,pwd) values (#{id},#{name},#{pwd});
 </insert>
 ```
 
@@ -495,3 +495,124 @@ int deleteUser(int id);
 
 编写接口 ，编写xml和SQL，编写测试
 
+## 4.错误排查
+
+1. namespace 用的是类全名
+2. 标签不要匹配错
+3. 在mapper注册哪里，mapper元素的resource属性的值是用/ 而不是用.    ，最终指向UserMapper.xml文件 
+
+**读错要从后往前读**
+
+4. 同为static 的变量和代码块和静态方法执行顺序无规律，sqlSessionFactory  为空。应将代码块和静态方法合并
+5. 输出的xml文件中存在乱码
+6. maven中xml文件么法导出，用build的xml代码解决
+
+## Map和模糊查询扩展
+
+### 1.万能的Map
+
+假设我们的实体类或者数据库库中的表，字段或者参数过多，我们应当用Map。
+
+在Mapper中
+
+#### addUser2
+
+```java
+int addUser2(Map<String,Object> map);//用map就不用关系数据库的表中都有哪些字段
+```
+
+```xml
+//对象中的属性可以直接取出来，，传入的Map时，传递的是map的key
+<insert id = "addUser2" parameterType = "map">
+	insert into mybatis.user (id,pwd) values (#{userid},#{passWord});
+</insert>
+```
+
+测试
+
+```java
+@Test
+public void addUser2(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+	Map<String,Object> map = new HashMap();
+    map.put("userid",4);
+    map.put("password","20000");
+    int number = userMapper.addUser2(map);
+    if(number > 0){
+        System.out.println("修改成功");
+    }
+    sqlSession.commit();
+    sqlSession.close();
+}
+```
+
+####  getUserById2()
+
+```java
+User getuserById2(Map<String,Object> map);
+```
+
+```xml
+<select id = "getUserById2" parameterType = "map" resultType = "com.gxl.pojo.User">
+	select mybatis.user where id = #{helloId},name = #{name};
+</select>
+```
+
+测试
+
+```java
+@Test
+public void getUserById2(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+   Map<String,Object> map = new HashMap();
+    map.put("helloId",4);
+    map.put("password","20000");
+    int number = userMapper.selectUserById2(map);
+    if(number > 0){
+        System.out.println("修改成功");
+    }
+    sqlSession.commit();
+    sqlSession.close();
+}
+```
+
+总： Map传递参数，直接在SQL中取出key即可
+
+只有一个对象传递参数，直接在SQL中取出属性即可
+
+只有一个基本类型的参数的情况下，在SQL中直接取用。如果是多个参数，只能用map，或者注解
+
+### 2.模糊查询怎么写：
+
+```java
+List<User> getUserLike(String value);
+```
+
+```xml
+<select id = "getUserLike" resultType = "com.gxl.pojo.User">
+	select * from mybatis.user where name like #{value}
+</select>
+```
+
+```java
+@Test
+public void getUserLike(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+  	List<User> userList = userMapper.getUserLike("%李%");
+    for(User user : userList){
+        System.out.println(user);
+    }
+    
+    
+    sqlSession.commit();
+    sqlSession.close();
+}
+}
+```
+
+1. java代码执行的时候，传递通配符% %
+   - 也可： select mybatis.user where name like "%"#{value}"%"
+2. 在SQL拼接中使用通配符，如上。
