@@ -122,22 +122,27 @@ new一个module，
     - > ```xml
       > <?xml version="1.0" encoding="UTF-8" ?>
       > <!DOCTYPE configuration
-      >   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-      >   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+      > PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+      > "http://mybatis.org/dtd/mybatis-3-config.dtd">
       > <configuration>
-      >     
-      >   <environments default="development">
-      >     <environment id="development">
-      >       <transactionManager type="JDBC"/>
-      >       <dataSource type="POOLED">
-      >         <property name="driver" value="com.mysql.jdbc.Driver"/>
-      >         <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL = true &amp; useUnicode = true &amp; characterEncoding = UTF-8"/>
-      >         <property name="username" value="root"/>
-      >         <property name="password" value="root"/>
-      >       </dataSource>
-      >     </environment>
-      >   </environments>
-      >  
+      > 
+      > <environments default="development">
+      >  <environment id="development">    //development 开发
+      >    <transactionManager type="JDBC"/>  //事物管理
+      >    <dataSource type="POOLED">
+      >      <property name="driver" value="com.mysql.jdbc.Driver"/>
+      >      <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL = true &amp; useUnicode = true &amp; characterEncoding = UTF-8"/>
+      >      <property name="username" value="root"/>
+      >      <property name="password" value="root"/>
+      >    </dataSource>
+      >  </environment>
+      > </environments>
+      > 
+      >     //每一个Mapper.xml都需要在Mybatis核心配置文件中注册
+      >     <mappers>
+      >         //resource中指的是target中的路径，target中会生成class文件，指定java类没有问题，但不会生成xml文件，无法指引成功。解方法见测试 错误点2
+      >      	<mapper resource = "com/kuang/dao/UsrDaoMapper.xml"></mapper>
+      >     </mappers>
       > </configuration>
       > ```
 
@@ -162,14 +167,150 @@ public class MybatisUtils {
         }catch (IOexception e){
             e.printStackTrace();
         }
+    }
         
         //既然有了SqlSessionFactory ,顾名思义，我们就可以得到SqlSession 的实例了。Sqlsession完全包含了面向数据库执行了SQL命令所需的方法。
-        public static SqlSession getSqlSession() {
-            return SqlSessionFactory.openS
-        }
+     public static SqlSession getSqlSession() {
+            return SqlSessionFactory.openSession();
     }
 }
 ```
 
 
 
+### 2.3编写代码
+
+-  实体类
+- Dao接口
+- 接口实现类    : 由原来的UserDaoImpl转换为xml的Mapper配置文件
+
+创建一个包： pojo
+
+在pojo包内创建一个类：User  //实体类
+
+创建dao包，在dao包内创建接口： UserDao      //dao 等价于mapper
+
+​                      在dao包内创建UserDao的实现类,这是jdbc中常用的途径，而Mybatis的作用就是避免几乎一切jdbc代码和实现自动配置。
+
+```java
+public interface UserDao{
+    public List<User> getUserList();
+}
+```
+
+​                      在dao包下创建一个UserMapper.xml文件。  //mapper 完全等于Dao
+
+内容在文档中
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+//命名空间，绑定一个dao/mapper接口
+<mapper namespace="com.kuang.dao.UserDao">
+    //查询语句  ，id对应的是方法名字
+  <select id="getUserList" resultType = "com.kuang.pojo.User" >//返回的应该是List<User> ,但所有的集合都写成其泛型的类型
+    select * from mybatis.user
+  </select>
+</mapper>
+```
+
+对比于UserImpl:
+
+```java
+public class UserImpl implements UserDao{
+    public List<User> getUserList(){
+        //执行SQL语句
+        String sql = "select * from mybatis.user";
+    }
+}
+```
+
+### 2.4测试
+
+注意点： 错误点1: Type interface com.kuang.dao.UserDao is not known to the MapperRegistry   .Mapper注册表中没发现UserDao 这个Mapper 。需要在Mybatis-config.xml 文件中添加上注册。
+
+​                错误点2：maven不会自动在target红色文件夹中生成xml文件，需要人为写代码规定其过滤条件
+
+在总项目的pom.xml和分项目的pom.xml 中都写上:
+
+   ```xml
+   //在build中配置resources，来放置我们的资源到处失败的问题
+   <build>
+   	<resource>
+       	<directory>src/main/resources</directory>
+           <includes>
+               <include>**/*.properties</include>
+               <include>**/*.xml</include>
+           </includes>
+           <filtering>true</filtering>
+       </resource>
+       <resource>
+       	<directory>src/main/java</directory>
+           <includes>
+           	<include>**/*.properties</include>
+               <include>**/*.xml</include>
+           </includes>
+           <filtering>true</filtering>
+       </resource>
+   </build>
+   ```
+
+
+
+- Junit测试
+
+写在text/java 文件夹里面。这是Maven项目的规范
+
+并且让绿色的java文件夹和main/java这个蓝色的文件夹做到一一对应。
+
+com.kuang.dao  UserDaoTest
+
+```java
+public class UserDaoTest{
+    public void test(){
+        //获取SqlSession 对象
+        SqlSession sqlSession = MybatisUtils.getSqlSession();
+        //执行SQL
+        //方式一
+        UserDao userDao = SqlSession.getMapper(UserDao.class);
+        List<User> userList = userDao.getUserList();
+        //方式二
+        List<User> userList = sqlSession.selectList("com.kuang.dao.UserDao.getUserList");
+        
+        
+        for(User user : userList){
+            System.out.println(user);
+        }
+        //关闭SqlSession
+        sqlSession.close();
+    }
+}
+```
+
+你可能遇到的问题：
+
+1. 配置文件没有注册
+2. Maven导出资源问题
+3. 绑定接口有错误
+4. 方法名不对
+5. 放回类型不对
+
+.. SqlSession 是线程不安全的，因此每个线程都应该有一个自己sqlSession .每次收到一个http请求，就应该打开一个SQLSession，返回一个响应，就关闭他。关闭响应特别重要
+
+官方建议方式：
+
+SqlSession sqlSession;
+
+try{
+
+代码
+
+}catch(Excection e){
+
+}finally{
+
+SqlSession.close();
+
+}
