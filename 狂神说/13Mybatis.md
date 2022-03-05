@@ -507,7 +507,7 @@ int deleteUser(int id);
 5. 输出的xml文件中存在乱码
 6. maven中xml文件么法导出，用build的xml代码解决
 
-## Map和模糊查询扩展
+## 5.Map和模糊查询扩展
 
 ### 1.万能的Map
 
@@ -616,3 +616,102 @@ public void getUserLike(){
 1. java代码执行的时候，传递通配符% %
    - 也可： select mybatis.user where name like "%"#{value}"%"
 2. 在SQL拼接中使用通配符，如上。
+
+## 配置之属性优化，配置解析
+
+### 1.核心配置配置文件
+
+- Mybatis-config.xml  //官方建议命名
+  - properties 属性
+  - settings 设置
+  - typeAliases 类型别名
+  - environments 环境配置
+    - transactionManager 事务管理器
+    - DataSource 数据源
+  - mappers 映射器
+
+了解：
+
+​         typeHandles 类型处理器
+
+​		objectFactory  对象工厂
+
+​		plugins  插件
+
+​		databaseProvide 数据库厂商标识
+
+新建一个子项目： Mybatis02
+
+将Mybatis01 中的 工具类 、实体类、和dao4包以及测试包转移到Mybatis02中（似乎把代码重新复制额一份）
+
+### 2。环境变量（environments）
+
+可以配置多种环境，但是每个SqlssionFactory实例只能选择一种环境。
+
+```xml
+<environments default="test">
+    <environment id="development">
+      <transactionManager type="JDBC"/>
+      <dataSource type="POOLED">
+        <property name="driver" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+      </dataSource>
+    </environment>
+    
+    <environment id = "test">
+        <transactionManager type="JDBC"/>
+      <dataSource type="POOLED">
+        <property name="driver" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+      </dataSource>
+    </environment>
+  </environments>
+```
+
+- environments 的default属性是决定该项目当前用的是哪种环境。学会使用多种运行环境的切换
+- 事务管理器（transactionManager)： 只有两个值： JDBC  和 MANAGED  .只用JDBC，第二个几乎没用。如果使用spring+mybatis 就完全不需要配置这个
+- 数据源（dataSource) : 连接数据库 ，dbcp ,c3p0,druid ,hikari   
+  - 三种内建的数据类型 ： type = UNPOOLED   POOLED   JND    ，分别为： 无池连接、有池连接、正常连接
+    - 池：起到 用完可以回收 的作用
+      - 默认是有池类型 POOLED
+
+### 3。属性（properties）
+
+我们可以通过properties属性来实现引用配置文件
+
+这些元素都是可以外部配置且可以动态替换的，既可以在典型的java属性文件中配置，亦可以通过properties元素的子元素类传递
+
+**在xml中，元素之间是有固定顺序的**
+
+db.properties  ：编写一个数据库配置文件
+
+//只有在xml文件中&才需要转移：   \&amp;
+
+```properties
+driver = com.mysql.jdbc.Driver 
+url = jdbc:mysql://localhost:3306/mybatis?useSSL = true & useUnicode = true & characterEncoding = UTF-8     
+username = root
+password = root
+```
+
+将该文件放在resource目录下，在Mybatis-config.xml中引用的时候就不需要写全路径了。
+
+```xml
+<!--引用外部properties文件-->
+<properties resource = "db.properties">
+	<property name = "username" value = "root"/>
+    <property name = "pwd" value = "root"/>
+</properties>//优先级：优先使用外部配置文件
+//也可以自闭合，如果没有property属性要写的话
+<properties resource = "db.properties"/>
+```
+
+总配置文件引入 .properties文件后，就可以全程用"${driver}"  这样的写法实现元素值得引用- 
+
+- 可以直接引入外部配置文件
+- 可以在其中增加一些属性配置
+- 如果两个地方冲突，优先使用外部配置文件
