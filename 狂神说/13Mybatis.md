@@ -617,7 +617,7 @@ public void getUserLike(){
    - 也可： select mybatis.user where name like "%"#{value}"%"
 2. 在SQL拼接中使用通配符，如上。
 
-## 配置之属性优化，配置解析
+## 6.配置之属性优化，配置解析
 
 ### 1.核心配置配置文件
 
@@ -715,3 +715,46 @@ password = root
 - 可以直接引入外部配置文件
 - 可以在其中增加一些属性配置
 - 如果两个地方冲突，优先使用外部配置文件
+
+## 7.配置之别名优化，类型别名typeAliases
+
+为java类型设置短的名字，只和xml配置有关，存在的意义在于减少类完全限定名的冗余
+
+```xml
+<typeAlises>
+	<typeALias type = "com.gxl.pojo.User" alias = "User"/>  //在Mybatis-config.xml中设定，在该模块任何xml位置都能用。
+</typeAlises>
+```
+
+```xml
+<select id = "getUserById" resultType = "User">
+ 	select * from mybatis.user where id = #{id}
+</select>
+```
+
+也可以指定一个包名，mybatis 会在包名下搜索需要的java bean(Java类)，扫描实体类的包后，类的别名默认就是这个类名的首字母小写，也可以完全是类名（首字母大写） 。但是官方建议小写，让人一眼看出是扫描包名的别名。
+
+```xml
+<typeALiases>
+	<package name = "com.gxl.pojo"/>
+</typeALiases>
+```
+
+```xml
+<select id = "getUserById" resultType = "user">
+ 	select * from mybatis.user where id = #{id}
+</select>
+```
+
+如果实体类比较少，使用第一种方式。
+
+如果实体类比较多，使用第二种方式。
+
+第一种方式可以DIY（自定义）.第二种方式只能用类名或者类名首字母小写。
+
+但是可以借助@Alias 注解给扫描包的类进行起别名。
+
+## 8。设置 settings
+
+这是Mybatis中极为重要的调整设置。他们会改变Mybatis的运行时的行为
+
