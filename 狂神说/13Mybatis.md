@@ -758,3 +758,580 @@ password = root
 
 这是Mybatis中极为重要的调整设置。他们会改变Mybatis的运行时的行为
 
+目前只需记忆：
+
+logImpl      : 日志的具体实现
+
+| logImpl | SLF4J \| LOG4J(deprecated since 3.5.9) \| LOG4J2 \| JDK_LOGGING \| COMMONS_LOGGING \| STDOUT_LOGGING \| NO_LOGGING |
+| ------- | ------------------------------------------------------------ |
+|         |                                                              |
+
+## 8.配置之映射说明
+
+不重要的配置：
+
+- typeHanders  类处理器
+- objectFactory  对象工厂
+- plugins 插件
+  - mybatis-generator-core
+  - mybatis-plus
+  - 通用mapper
+
+### 映射器：mappers
+
+方式： 
+
+- 资源路径
+
+  - ```xml
+    <mappers>
+    	<mapper resource = "org/mybaits/PostMapper.xml"/>
+    </mappers>
+    ```
+
+  - 
+
+- 使用映射器接口实现类的完全限定类名
+
+  - ```xml
+    <mappers>
+    	<mapper class = "org.mybatis.builder.PostMapper"/> 此时的mapper.xml 和 mapper 接口需要在一个包里，并且接口和实现xml 需要用一样的名字。
+    </mappers>
+    ```
+
+  - 接口和Mapper配置文件必须重名
+
+  - 接口和Mapper配置文件必须在同一包下
+
+- 将包内的映射器接口实现全部注册为映射器
+
+  - ```xml
+    <mappers>
+    	<package name = "org.mybatis.builder"/>
+    </mappers>
+    ```
+
+  - 使用包扫描要求和第二种方式一样，必须重名，必须在同一个包下
+
+练习实践：
+
+- 将数据库的配置文件外部引入
+- 实体类别名
+- 保证UserMapper接口和UserMapper.xml命名一致，并放在同一个包下。
+
+## 9.声明周期和作用域
+
+- 开始执行  Mybatis-config.xml 配置文件
+
+- 是为了创建SqlSessionFactoryBuilder对象：一旦创建Factory，就不需要他了。局部变量
+
+- 接着建造SqlSessionFactory 对象   ：说变了就可以想象成数据库连接池，一点出现，就必须持续存在，没有任何理由销毁他的对象最简单的就是使用单例模式或者静态单例模式
+
+- 生产SqlSession对象
+  - 每个线程都应该有一个SqlSession 实例，相当于一个连接数据库的请求。最佳作用域是放在一个方法里面，用完之后赶紧关闭，方式资源浪费。线程不安全，不能共享数据。
+
+- 生成Sql Mapper 
+
+- 结束
+
+这里面的每一个Mapper，就代表一个业务。
+
+## 10。解决属性名和字段名不一致的问题。ResultMap 结果集映射
+
+新建一个项目，测试实体类字段不一致的情况。
+
+mybatis03 项目
+
+直接拷贝mybatis02
+
+实体类的属性和数据库的字段不一样
+
+```java
+public class User{
+	private int id;
+    private String name;
+    private String password;
+    
+    ...
+}
+```
+
+```xml
+select * from mybatis.user where id = #{id}
+```
+
+查出后发现password属性值为null
+
+完整的语句应该是：
+
+select  id,name,pwd from mybatis.user where id = #{id}
+
+类型处理器：  如果实体类的属性和字段一致，则自动映射。如果不一致，则pwd无法和实体类中的password对应
+
+解决防范：
+
+- 起别名：
+
+  - select id,name pwd as password from mybatis.user where id = #{id}
+
+- 使用 resultMap来解决。结果集映射
+
+  - ``` 
+    id  name  pwd
+    id  name  password
+    ```
+
+  - ```xml
+    <mapper namespace = "com.gxl.dao.UserMapper">
+    	<resultMap id = "UserMap" type = "User">
+        	<result column = "id" property = "id"/>
+            <result column = "name" property = "name"/>
+            <result column = "pwd" property = "password"/>
+        </resultMap>>   //column 为数据库字段    property 为实体类属性
+      	<select id = "getUserById" resultMap = "UserMap">
+        	select * from mybatis.user where id = #{id}
+        </select>
+    </mapper>
+    ```
+
+  - ResultMap 的设计思想：只是简单描述关系。
+
+  - resultMap最优秀的地方就是： 当你对它相当了解的时候，不必要显示地用到它们。既：名字相同的对应是默认的，我们没必要写一遍。
+
+  - resultMap代替resultType
+
+## 11.日志工厂
+
+新建一个项目：mybatis-04；没有-可能会有不好的结果
+
+如果一个数据库操作出现异常，我们需要排错，日志就是最好的助手，
+
+曾经：sout   debug
+
+现在： 日志工厂
+
+| logImpl | SLF4J \| LOG4J(deprecated since 3.5.9) \| LOG4J2 \| JDK_LOGGING \| COMMONS_LOGGING \| STDOUT_LOGGING \| NO_LOGGING |
+| ------- | ------------------------------------------------------------ |
+|         |                                                              |
+
+- LOG4J
+- STDOUT_LOGGING
+
+具体使用哪一个日志实现，在设置中设定。
+
+STDOUT_LOGGING 标准日志输出
+
+在mybatis核心配置文件中配置 settings元素
+
+```xml
+<settings>
+	<setting name = "logImpl" value = "STDOUT_LOGGING"/> //STDOUT_LOGGING 标准日志，什么周边都不需要配置
+</settings>
+```
+
+## 12.log4j的实现
+
+1. LOG4G  我们可以控制日志信息 输入到控制台或者文件，或者GUI组件
+
+2. 我们也可以控制日志输出的格式
+
+3. 可以定义每一条日志信息的级别
+
+4. 更令人感兴趣的是我们可以通过一个配置文件来灵活的进行配置，而不需要修改应用的代码
+
+
+
+1. 先导入LOG4G 的包，在maven资源包网站 搜索log4g  ，获得包的依赖。
+
+   - ```xml
+     <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+     <dependency>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-core</artifactId>
+         <version>2.17.1</version>
+     </dependency>
+     ```
+
+2. 在resource目录下创建log4j.properties文件，在百度上随便找一个   log4j的配置文件
+
+   - ```properties
+     ### 配置根 ###
+     log4j.rootLogger = debug,console,file
+     
+     ### 设置输出sql的级别，其中logger后面的内容全部为jar包中所包含的包名	 ###
+     log4j.logger.org.apache=dubug
+     log4j.logger.java.sql.Connection=dubug
+     log4j.logger.java.sql.Statement=dubug
+     log4j.logger.java.sql.PreparedStatement=dubug
+     log4j.logger.java.sql.ResultSet=dubug
+     ### 配置输出到控制台 ###
+     log4j.appender.console = org.apache.log4j.ConsoleAppender
+     log4j.appender.console.Target = System.out
+     log4j.appender.console.layout = org.apache.log4j.PatternLayout
+     log4j.appender.console.layout.ConversionPattern =  %d{ABSOLUTE} %5p %c{ 1 }:%L - %m%n
+     
+     ### 配置输出到文件 ###
+     log4j.appender.fileAppender = org.apache.log4j.FileAppender
+     log4j.appender.fileAppender.File = logs/log.log
+     log4j.appender.fileAppender.Append = true
+     log4j.appender.fileAppender.Threshold = DEBUG
+     log4j.appender.fileAppender.layout = org.apache.log4j.PatternLayout
+     log4j.appender.fileAppender.layout.ConversionPattern = %-d{yyyy-MM-dd HH:mm:ss}  [ %t:%r ] - [ %p ]  %m%n
+     
+     ### 配置输出到文件，并且每天都创建一个文件 ###
+     log4j.appender.dailyRollingFile = org.apache.log4j.DailyRollingFileAppender
+     log4j.appender.dailyRollingFile.File = logs/log.log
+     log4j.appender.dailyRollingFile.Append = true
+     log4j.appender.dailyRollingFile.Threshold = DEBUG
+     log4j.appender.dailyRollingFile.layout = org.apache.log4j.PatternLayout
+     log4j.appender.dailyRollingFile.layout.ConversionPattern = %-d{yyyy-MM-dd 
+     ### 配置输出到邮件 ###
+     log4j.appender.MAIL=org.apache.log4j.net.SMTPAppender
+     log4j.appender.MAIL.Threshold=FATAL
+     log4j.appender.MAIL.BufferSize=10
+     log4j.appender.MAIL.From=chenyl@yeqiangwei.com
+     log4j.appender.MAIL.SMTPHost=mail.hollycrm.com
+     log4j.appender.MAIL.Subject=Log4J Message
+     log4j.appender.MAIL.To=chenyl@yeqiangwei.com
+     log4j.appender.MAIL.layout=org.apache.log4j.PatternLayout
+     log4j.appender.MAIL.layout.ConversionPattern=[framework] %d - %c -%-4r [%t] %-5p %c %x - %m%n
+     
+     ### 配置输出到数据库 ###
+     log4j.appender.DATABASE=org.apache.log4j.jdbc.JDBCAppender
+     log4j.appender.DATABASE.URL=jdbc:mysql://localhost:3306/test
+     log4j.appender.DATABASE.driver=com.mysql.jdbc.Driver
+     log4j.appender.DATABASE.user=root
+     log4j.appender.DATABASE.password=
+     log4j.appender.DATABASE.sql=INSERT INTO LOG4J (Message) VALUES ('[framework] %d - %c -%-4r [%t] %-5p %c %x - %m%n')
+     log4j.appender.DATABASE.layout=org.apache.log4j.PatternLayout
+     log4j.appender.DATABASE.layout.ConversionPattern=[framework] %d - %c -%-4r [%t] %-5p %c %x - %m%n
+     log4j.appender.A1=org.apache.log4j.DailyRollingFileAppender
+     log4j.appender.A1.File=SampleMessages.log4j
+     log4j.appender.A1.DatePattern=yyyyMMdd-HH'.log4j'
+     log4j.appender.A1.layout=org.apache.log4j.xml.XMLLayout
+     ```
+
+3. 配置log4j的为日志的实现
+
+   - ```xml
+     <settings>
+     	<setting name = "logImpl" value = "LOG4J"></setting>
+     </settings>
+     ```
+
+   - 
+
+4. 直接测试运行。
+
+   ```java
+   static Logger logger = Logger.getLogger(UserDaoTest.class);
+   public void testLog4j(){
+       logger.info("info:进入testLog4j");
+       logger.debug("debug : 进入了testLog4j")；
+       logger.error("error:进入了testLog4j");       //均相当于System.out.println();
+   }
+   ```
+
+   简单使用：
+
+   1. 在要使用Log4j 的类中，导入类，import org.apache.log4j.Logger;
+
+   2. 日志对象，参数为当前类的class
+
+      - ```java
+        static Logger logger = Logger.getLogger(userDaoTest.class);
+        ```
+
+   3. 日志级别
+      1. info
+      2. debug
+      3. error
+      
+      
+
+## 13.Limit实现分页
+
+分页 是一种常见的应用。
+
+减少数据的处理量，让效率更高。
+
+使用Limit分页：
+
+  ```sql
+  select * from user limit 0,2;   //每页显示两个，从第零个开始查
+  select * from user limit 2,2;
+  select * from user limit 4,-1;//从第四个开始，到最后一个结束
+  select * from user limit 2;  //从0 开始，显示两个
+  ```
+
+使用mybatis实现分页，核心就是SQL。
+
+1. 接口
+2. Mapper.xml
+3. 测试
+
+```java
+public interface UserMapper{
+    User getUserById();
+    List<User> getUserByLimit(Map<String,Integer> map);
+}
+```
+
+```xml
+<select id = "getUserByLimit" parameterType = "map" resultType = "User">
+	select * from mybatis.user limit #{startIndex},#{pageSize}
+</select>
+```
+
+```java
+@Test
+public void getUserByLimit(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getSqlMapper(User.class);
+    Map<String ,Integer> map = new HashMaper<Stirng,Integer>();
+    map.put("startIndex",0);
+    map.put(pageSize,2);
+    List<User> userList = mapper.getUserByLimit(map);
+    for(User user : userList){
+        System.out.println(user);
+    }
+    
+    sqlSession.close();
+}
+```
+
+## 14.RowBounds分页
+
+RowBounds类，利用java的面向对象的思想，而不是用limit这种SQL语言。不过在这里面向对象没有limit优秀
+
+```java
+List<User> getUserByRowBounds();
+```
+
+```xml
+<select id = "getUserByRowBounds" resultMap = "UserMap">
+	select * from mybatis.user
+</select>
+```
+
+测试
+
+```java
+@Test
+public void getUserByRowBounds(){
+    SqlSession sqlsession = MybatisYtils.getSqlSession();
+    RowBounds rowBounds = new RowBounds(1,2)；//从第1个数据开始查看（还有第0个）；每页显示2个
+    List<User> userList = sqlSession.selectList("com.gxl.dao.UserMapper.getUserByRowBounds",null,rowBouds) ;
+    for(User u: userLsit){
+        sout(u);
+    }
+}
+```
+
+不再使用SQL实现分页。
+
+- 接口
+- mapper.xml
+- 测试
+
+### 分页插件：
+
+进入maven仓库网站。没找到
+
+直接百度：Mybatis PageHelper
+
+了解就好，万一公司的架构师说要使用，你需要知道它是什么
+
+## 15.使用注解开发
+
+除了mybatis外的其他东西都是用注解开发，但是mybatis主要使用配置文件。
+
+面向接口编程。而不是面向对象编程。
+
+- 根本原因： 解耦，可拓展，提高复用性
+
+- 关于接口更深层次的理解：定义与实现的分离
+- 接口的本身反应了系统设计人员对系统的抽象理解
+
+使用注解开发：
+
+要将mybatis文档倒背如流！
+
+```java
+public interface UserMapper{
+    @Select("select * from mybatis.user where id = #{id}")
+    User selectUserById(int id);
+}
+```
+
+新建一个项目：mybatis-05
+
+完全拷贝
+
+
+
+编写接口
+
+```java
+public interface UserMapper{
+    @Select("select * from mybaits.user")
+    List<User> getUsers();
+}
+```
+
+绑定接口（之前是绑定配置文件）在mybatis-config.xml 文件中
+
+```
+<mappers>
+	<mapper class = "com.gxl.dao.UserMapper"/>
+</mappers>
+```
+
+测试：
+
+```java
+@Test
+public void getUsers(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    List<User> userList = mapper,getUsers();
+    for(User u : userList){
+        sout(user);
+    }
+    sqlSession.close();
+}
+```
+
+使用注解可以让代码变得简洁。但是对于稍微复杂的diamante使用注解就显得力不从心。如： 实体类属性和数据库字段不一样的时候 注解就没法处理
+
+注解开发的核心就是使用java的类反射。
+
+- 本质为： 反射机制实现
+- 底层为： 动态代理
+
+## 16.mybatis的详细执行流程
+
+1. 通过resources对象获取加载全局配置文件。mybatis-config.xml 的所有内容都装载sqlSession 里面，打断点debug一下可以发现
+2. 实例化SqlSessionFactoryBuilder 构造
+3. 解析配置文件流 ，使用XMLConfigBuilder对象解析xml文件流，将信息都放在configuration中。所有的配置信息都放在Configuration对象里
+4. 实例化SqlSessionFactory
+5. 创建transactional 事务管理器
+6. 创建excutor执行器。这是mybatis的核心的核心
+7. 创建SqlSession
+8. 实现 CRUD       回滚到步骤5
+9. 查看是否执行成功 
+   1. 是： 结束
+   2. 否： 回滚到 步骤5
+
+## 17.注解实现增删改查
+
+### 自动提交事务
+
+我们可以在工具类创建的时候实现自动提交事务。事务在增删改中都涉及，查 的时候不用管
+
+```java
+return sqlSessionFacroty.openSqlSession(true); 就可以得到自动提交事务的SQLSession，默认是不自动提交的。之后增删改后都不用commit了
+```
+
+通过id查询：
+
+```java
+@Select("select * from mybatis.user where id = #{id})
+User getUserById(@Param（“id”） int id）);// 方法存在多个参数，每个参数前面必须加@Param("value"),"value" 中的value 才是注解中要用到的引用
+```
+
+```java
+@Test
+public void getUserById(){
+     SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+   User user = mapper.getUserById(2);
+    sqlSession.close();
+}
+```
+
+```java
+@Insert("insert into mybatis.user(id,name,pwd) values(#{id},#{name}.#{pwd})")
+int addUser(User user);
+```
+
+```java
+@Test
+public void addUser(){
+     SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    int number = mapper.adddUser(new User(111,"name","pwd_hahaha");
+    sqlSession.close();
+}
+```
+
+```java
+@Update(update user set name = #{name},pwd = #{pwd} where id = #{id})
+int updateUser(User user);
+```
+
+```java
+@Test
+public void addUser(){
+     SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    int number = mapper.updateUser(new User(1,"name","pwd_hahaha");
+    sqlSession.close();
+}
+```
+
+```java
+@Delete("delete from mybatis.user were id = #{uid}")
+int deleteUserById(@Param("uid") int id);
+```
+
+```java
+@Test
+public void addUser(){
+     SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    int number = mapper.deleteUserByI(2);
+    sqlSession.close();
+}
+```
+
+注意： 我们必须一定要将Mapper接口注册到核心配置文件中
+
+映射.xml 文件有捷径：
+
+```xml
+<mappers>
+	<mapper resource = "com/gxl/dao/*.xml"/>   //可以一次注册整个包的.xml文件。或者。。。/*Mapper.xml
+</mappers>
+```
+
+关于@Param（）注解：
+
+- 无论基本类型的参数或者String类型的参数都需要佳航
+- 引用类型不需要加
+- 如果只有一个基本类型 可以忽略，建议都加上
+- 我们在SQL中引用的就是我们这里param中设定的属性名
+
+#{} 和${} de 区别：
+
+- 都可以进行数据传递，甚至替换一下也无伤大雅。
+- 但是#{} 能很大程度的防止SQL注入，既传入的数据是作为单独的字符串，不会和邻近相互作用拼接
+
+## 18.LomBok的使用
+
+工作中必须用
+
+他是一个java库，是一个插件，是一个构建工具
+
+再也不用写getter  setter or equal function，只需要加一个注解就可以了。都能夹什么注解呢：在idea中的plugins中，输入lombok，如果已经安装过插件，在右端会看到对它的介绍，会显示所有可以用的注解
+
+使用：
+
+1.  在IDEA中安装LomBok插件。
+2. 在项目中导入jar包。。包在Maven仓库网站里。scope是作用域的意思，这个属性不用写，默认作用域所有环境
+
+- @Data ： 无参构造  getter and setter  tostring  hashcode  equals 
+- @AllArgsConstructor  全参构造
+- @NoArgsConstructor   无参构造
+- @Getter   放在类上对所有属性生成getter方法，放在属性上，给单个属性生成getter方法
+
