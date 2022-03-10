@@ -1335,3 +1335,263 @@ public void addUser(){
 - @NoArgsConstructor   无参构造
 - @Getter   放在类上对所有属性生成getter方法，放在属性上，给单个属性生成getter方法
 
+## 19.复杂查询环境搭建
+
+### 多对一：
+
+好比 多个学生对应一个老师
+
+对于学生这边而言，关联，多个学生关联一个老师   多对一
+
+对于一个老师而言，集合，一个老师有多个学生  一对多
+
+SQL语言：
+
+```sql
+create table `teacher`(
+	`tid` int(10) not nll,
+    `name` varchar(30) default null,
+    primary key (`id`),
+)  engine = innodb default charset = utf8
+insert into `teacher` (`id`,`name`,`tid`) values (1,'秦老师');
+create table `student`(
+    `id` int(10) not nll,
+    `name` varchar(30) default null,
+    `tid` varchar(30) default null,
+    primary key (`id`),
+	 key `fiktid` (`tid`),
+    constraint `fiktid` foreign key (`tid`) references `teacher` (`id`)
+) engine = innodb default charset = utf8
+insert into `student` (`id`,`name`,`tid`) values ('1','tom','1');
+insert into `student` (`id`,`name`,`tid`) values ('1','tom-1','1');
+insert into `student` (`id`,`name`,`tid`) values ('1','tom-2','1');
+insert into `student` (`id`,`name`,`tid`) values ('1','tom-3','1');
+insert into `student` (`id`,`name`,`tid`) values ('1','tom-4','1');
+insert into `student` (`id`,`name`,`tid`) values ('1','tom-5','1');
+```
+
+
+
+创建mybatis-06 项目
+
+1. 建立数据库对应的实体类。
+
+   ```java
+   public class Student{
+       private int id;
+       private String name;
+       private Teacher teacher;
+   }
+   ```
+
+   ```java
+   public class Teacher{
+       private int tid;
+       private String name;
+   }
+   ```
+
+   2. 建立与实体类对应的Mapper接口，一个实体类对应一个Mapper 。
+
+       ```java
+       public interface TeacherMapper{
+           @Select("select * from teacher where id = #{tid}")
+           Teacher getTeacher(@param("tid") int id);
+       }
+       ```
+
+```java
+public interface StudentMapper{
+    
+}
+```
+
+3. 编写和Mapper对应的xml文件。因为有两个Mapper，都放在一起有些乱，可以放在resource目录下，并且仍然先建立一个包： com.gxl.dao ，然后把xml文件放在里面，达到间接 同包。
+
+```xml
+//如何写头文件？ 将mybatis-config.xml复制过来，删除configuration 中的一切，在头文件中所有的config字样更改为mapper字样。把configuration更改文Mapper字样.既，将config 字样和configuration字样均改为mapper，头文件一共改三处
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.gxl.dao.StudentMapper">
+    
+
+
+<mapper/>
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.gxl.dao.StudentMapper">
+    
+
+
+<mapper/>
+```
+
+4. 在config文件中注册mapper
+
+```xml
+<mappers>
+	//<mapper resource = "com/kuang/doa/*.xml"/>//错误，找不到文件
+    <mapper class = "com.gxl.dao.TeacherMapper"/>  //成功
+    <mapper class = "com.gxl.dao.StudentMapper"/>
+</mappers>
+```
+
+5. 测试
+
+```java
+public class MyTest(){
+    @Test
+    public void getTeacher(){
+        SqlSession sqlSession = MybatisUtils.getSqlSession();
+        TeacherMapper teacherMapper = sqlSession.getMapper(TeacherMapper.class);
+        Teacher teacher = teacherMapper.getTeacher(1);
+        teacher.sout();
+        sqlSession.close();
+    }
+}
+```
+
+## 20 多对一的处理
+
+需求： 
+
+```sql
+select s.id,s.name ,t.name from student s,teacher t where s.tid = t.id;
+```
+
+```java
+public interface StudentMapper{
+    //查询所有的学生和对应的老师
+    List<Student> getStudent();
+}
+```
+
+思路： 
+
+1. 查询 出所有的学生信息
+2. 更具查询出的id寻找出对应的耗时。
+
+```xml
+<select id = "getStudent"  resultMap = "StudentTeacher">
+	select * from student 
+</select>
+<resultMap id = "StudentTeacher" type = "Student">
+	<result property = "id" column = "name"/>
+    //复杂的属性 。我们需要单独处理
+      对象： association
+      集合： collection
+    <association property = "teacher" column = "tid" javaType = "Teacher" select = "getTeacher"/>
+	
+</resultMap>
+<select id = "getTeacher" resultType = "Teacher">
+	select * from teacher where id = #{id}
+</select>
+```
+
+ 按照查询嵌套原理,上面
+
+
+
+按照结果嵌套原理:
+
+```xml
+<select id  "getStudent2" resultMap = "StudentTeacher2">
+	select s.id sid,s.name sname t.name tname 
+    from student s,teacher t
+    where s.tid = t.id;
+</select>
+
+<resultMap id = "studentTeacher2" type = "Student">
+    <result prperty = "id" column = "sid"/>
+    <result property = "name" column = "sname"/>
+    <association property = "teacher" javaType = "Teacher">
+    	<result property = "name" column = "tname"/>
+    </association>>
+</resultMap>
+```
+
+
+
+## 21.一对多
+
+一个老师对应多个学生
+
+```java
+public class Student {
+    private int tid;
+    private String name;
+    private int id;
+}
+public class Teacher{
+    private int id;
+    private String name;
+    private List<Student> students;
+}
+```
+
+```java
+public interface Teacher{
+   List<teacher> getTeacher();
+    //获取指定老师的所有学生和老师信息
+    Teacher getTeacher(@param("tid") int id);
+}
+```
+
+```xml
+//按照结果嵌套查询
+<select id = "getTeacher" resultMap = "TeacherStudent">
+	select s.id sid, s.naem sname, t.name tname,t.id tid
+ from student s,teacher t
+ where s.tid = t.id and t.id = #{tid};
+</select>
+<reultMap id = "TeacherStudent" type = "Teacher">
+	<result property = "id" column =  "tid"/>
+    <result property = "name" column = "tname"/>
+    //javaType 指定属性的类型
+      ofType 指定集合中泛型信息
+    <collection property = "studnets" ofType = "Student">
+    	<result property = "id" column = "sid"/>
+        <result property = "name" column = "sname"/>
+         <result property = "tid" column = "tid"/>
+        
+    </collection>
+</reultMap>
+```
+
+```sql
+select s.id sid, s.naem sname, t.name tname,t.id tid
+ from student s,teacher t
+ where s.tid = t.id;
+```
+
+子查询的方式:
+
+```xml
+<select id = "getTeacher2"  resultMap = "TeacherStudent2">
+	select * from mybatis.teacher where id = #{id} 
+</select>
+
+<reultMap id = "TeacherStudent2" type = "Teacher">
+	<result property = "id" column =  "tid"/>
+    <result property = "name" column = "tname"/>
+    //javaType 指定属性的类型
+      ofType 指定集合中泛型信息
+    <collection property = "studnets" javaType = "ArrayList" ofType = "Student">
+        
+    </col
+    	<result property = "id" column = "sid"/>
+        <result property = "name" column = "sname"/>
+         <result property = "tid" column = "tid"/>
+        
+    </collection>
+</reultMap>
+```
+
