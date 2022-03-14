@@ -1580,18 +1580,88 @@ select s.id sid, s.naem sname, t.name tname,t.id tid
 </select>
 
 <reultMap id = "TeacherStudent2" type = "Teacher">
-	<result property = "id" column =  "tid"/>
-    <result property = "name" column = "tname"/>
     //javaType 指定属性的类型
       ofType 指定集合中泛型信息
-    <collection property = "studnets" javaType = "ArrayList" ofType = "Student">
-        
-    </col
-    	<result property = "id" column = "sid"/>
-        <result property = "name" column = "sname"/>
-         <result property = "tid" column = "tid"/>
-        
-    </collection>
+    <collection property = "studnets" javaType = "ArrayList" ofType = "Student" select = "getStudentByTeacehrId" column = "id"/>
 </reultMap>
+<select id = "getStudentByTeacherId" resultType = "Student">
+	select * from mybstis.studnet where tid = #{tid}
+</select>
+```
+
+也是两种方式： 
+
+- 按照结果嵌套处理
+- 按照查询嵌套处理
+
+小结:
+
+1. 关联  association  多对一
+2. 集合collection  一对多
+3. javaType  and  ofType 
+   1. javaType用来指定实体类中的属性的类型
+   2. ofType用来影视到List或者集合中pojo类型，泛型中约束类型
+
+注意点： 
+
+- 保证SQL的可读性，尽量保证通俗易懂，
+- 注意一对多和多对一中，属性名和字段的问题
+- 如果问题不好排查错误，可以通过日志拍错。
+
+慢SQL ： 所用时间太长。
+
+面试高频：
+
+- MySql 引擎
+- InnoDB底层原理
+- 缩影
+- 索引优化
+
+## 22.动态SQL环境的搭建。
+
+什么是动态SQL： 动态SQL就是指根据不同的条件生成不同的SQL
+
+搭建环境：
+
+新建项目 
+
+```java
+public class Blog{
+    private String id;
+    private String title;
+    private String author;
+    private Date createTime;//属性名和字段名不一致。通过一个配置 驼峰命名和下划线命名可以相互转化。数据库中都是下划线命名。在配置文件中的 '设置' 中可以配置
+    private int views;
+}
+```
+
+```java
+public interface BlogMapper{
+    int addBl(Blog blog);
+}
+```
+
+```xml
+<mapper>
+	<insert
+</mapper>
+```
+
+```java
+public class IDutils{
+    public statis String getId(){
+        return UUID.randomUUID().toString().replaceAll("-","");
+    }
+    @Test
+    public void test(){
+        sout(IDutils.getId());
+    }
+}
+```
+
+```xml
+<settings>
+	<setting name = "mapUnderscoreCamelCase" value = "true"/>
+</settings>
 ```
 
