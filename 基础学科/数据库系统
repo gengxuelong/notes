@@ -358,3 +358,123 @@ R交S = R - (R- S)
 - PostgreSQl 
 - OpenGauss    
 - mySql
+
+# 第三节课
+
+## SQL语言
+
+数据类型：
+
+查询MySQL 或者 POSTSQL文档。
+
+### 第一个动词： create
+
+创建一个数据库
+
+DBMS 维护数据库中的数据，给用户返回一个操作接口。DBMS数据库管理系统软件。
+
+DBMS有一个监听器，监听是否有一个客户请求链接我。pgAdmin 3   客户端软件，pgadmin 4 是服务器自带的客户端软件，是基于web的，也能用。
+
+首先创建一个数据库，然后创建关系。
+
+-- 表示注释
+
+char(2)  固定字符，必须两个字符，少了自动补齐空格
+
+varchar(20)   可变字符
+
+```sql
+select * 
+from student;
+
+select sNo,sName,
+from student;
+
+选择所有选了课的学生学号
+select distinct sNo              //distinct是消除重复行
+from sc;
+
+select sNo,sName,sex
+from student
+where sex = '女' or sex = '男' or sex is null;
+
+select sNo,sName,age,sex
+from student
+where age beteen 18 and 19 ;  //双闭区间
+
+select * 
+from student 
+where dNo in ('01');    //等价于 dNo = '01'
+
+select * 
+from student 
+where dNo in ('01','02');    // dNo = '01' or dNo = '02'
+
+select * 
+from student 
+where dNo not in ('01','02');  //不包括null值的
+
+select * 
+from student 
+where dNo not  ('01','02',null);   //没查出来null 值的行。因为他等价的是  。。 or dNo = null ; null 值无法用等号连接
+
+select * 
+from student 
+where dNo  in ('01','02') or dNo is null;
+
+select * 
+from student 
+where dNo not in (null);      //未返回任何值，因为null值不能和等号或者不等号匹配
+
+select * 
+from student 
+where sName like '张%';//任意字符的通配符
+
+select * 
+from student 
+where sName like '张_';  //单个字符的通配符
+
+select * 
+from student 
+where sName like '张__'; //两个字符的通配符
+
+如果本身就包含一个下换线呢
+
+select * 
+from student 
+where sName like 'DB\_%'; //找以DB_开头的
+
+select * 
+from student 
+where sName like 'DB\_%i__';//找以DB_开头的并且以i做倒数第三个字符
+
+select * 
+from student 
+where age <= 18 or age > 18;//不包含null值学生
+
+//排序
+select * 
+from student 
+order by age ASC;     DESC 降序，默认升序...null当做最大值来排（posteSQL)。
+
+select * 
+from student 
+order by dNo,age;
+
+select * 
+from student 
+order by sex;//可以根据字符格式的数据排序
+
+
+//聚集函数
+查找当有多少名学生
+select count(*)
+from student;
+
+select count(distinct age)
+from student;
+
+select count(sNo)
+from student;
+```
+
