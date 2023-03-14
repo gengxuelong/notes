@@ -12,7 +12,7 @@ javaEE非凡是很多java开发技术的总称，一共包含13个技术规范
 
 包括：
 
-​	JDBC , JNDI,RMI ,IDL/CORBA, JSP , Servlet ，XML , JTA , JTS , JavaMail ,JAF
+​    JDBC , JNDI,RMI ,IDL/CORBA, JSP , Servlet ，XML , JTA , JTS , JavaMail ,JAF
 
 ### web概括和资源分类
 
@@ -21,6 +21,7 @@ javaEE非凡是很多java开发技术的总称，一共包含13个技术规范
 - 像我们使用的www ，他是万维网的缩写
 
 - 网络相关技术的出现都是为了让我们在网络世界中获取资源，这些资源存放的地方我们把它叫做网站
+
 - 通过输入网站的地址（网址） ，就可以访问网站中提供的资源（部分局域网和广域网）
 
 资源的分类
@@ -100,7 +101,6 @@ tomcat 下载后的安装：
 
 - 点击startup.bat 启动窗口。出行小黑窗。
 - 叉掉小黑窗，就把服务器关了。或者点击shutdown.bat可执行文件
-
 3. 启动问题
    - 启动后窗口一闪而过：没有配置jdk环境变量
    - java.net.BindException : 端口8080 被占用
@@ -108,11 +108,10 @@ tomcat 下载后的安装：
    - 在webapps目录下创建一个文件夹
    - 将资源放在该文件夹里
    - 启动tomcat，输入正确的路径
-
 - 新建文件夹hello
 - 在hello目录下新建HTML文件：hello.html
 
-```html 
+```html
 <h1>
     hello tomcat
 </h1>
@@ -129,7 +128,7 @@ tomcat 下载后的安装：
 1. 进入tomcat的conf目录，找到logging.properties 配置文件
 
 2. 找到语句：
-
+   
    > java.util.logging.ConsoleHandler.encoding = UTF-8
 
 3. 更改为： gbk
@@ -194,7 +193,7 @@ localhost：8080
 在项目的web目录下大war包
 
 - 在该目录下进入cmd，输入命令：jar -cvf myewb.war .       //点代表当前路径
-
+  
   //将当前目录打成压缩包
 
 - 将打好的war包剪切到tomcat的webapps路径下
@@ -215,7 +214,7 @@ localhost：8080
 
 配置文件在tomcat的conf目录下
 
-当以后发布正式的项目的时候，的把端口号改为80 ，这样人家访问的时候就不用输入端口好了	
+当以后发布正式的项目的时候，的把端口号改为80 ，这样人家访问的时候就不用输入端口好了    
 
 ### tomcat配置虚拟目录
 
@@ -228,9 +227,9 @@ localhost：8080
 1. 编辑server.xml配置文件，找到<Host>标签
 
 2. 加入一下内容：
-
+   
    > <Context path = "/my" docBase = "d:/my"/>
-   >
+   > 
    > path 是在地址栏中输入的路劲，docBase是项目存在的真实路径。（是项目文件，不是压缩包，这会儿没自动解压功能了）
 
 ### tomcat配置虚拟主机
@@ -240,26 +239,25 @@ localhost：8080
 1. 编辑server配置文件，找到<Engine>标签，
 
 2. 加入一下内容
-
+   
    > <Engine ...>
-   >
+   > 
    > <Host name = "www.webdemo.com" appBase = "webapps" unpackWAR = "true" autoDeploy = "true">
-   >
-   > ​	<context path = "" docBase = "webdemo"/>
-   >
+   > 
+   > ​    <context path = "" docBase = "webdemo"/>
+   > 
    > </Engine>
-
+   
    - name : 访问虚拟主机的名称
    - appBase : 项目存放的路径
    - unpackWARs : 是否自动解压war包
    - autoDeploy : 是否自动发布
 
 3. 在windows中修改host文件
-
+   
    > host  
-   >
+   > 
    > 1. ​    127.0.0.1 www.webdemo.com
-
 - host文件在哪里呢：c:/windows/System32/driver/etc   目录
 
 在浏览器中：
@@ -277,10 +275,10 @@ www.webdemo.com:8080
 - 超文本： 比普通文本更加强大
 
 - 传输协议： 客户端和服务器的通信规则（握手规则）
+  
+  浏览器刷新一次页面，就是重新发起一次请求
 
- 浏览器刷新一次页面，就是重新发起一次请求
-
-​	注意：JavaScript css  图片资源会自动发起请求
+​    注意：JavaScript css  图片资源会自动发起请求
 
 ### 协议的请求
 
@@ -329,8 +327,6 @@ if-None-Match : ...
 
 请求体： get方式的请求没用请求体
 
-
-
 POST方式：
 
 请求行：
@@ -350,13 +346,16 @@ username = aaa&password = 123
 ### http协议的响应
 
 - 响应的组成部分
+  
   - 响应行
   - 响应头
   - 响应空行
   - 响应体
 
 - 相应行：POST HTTP/1.1 OK
+
 - 响应头
+  
   - Accept-Ranges : bytes    //数据的单位
   - ETag : ...                //该响应在服务器中惟一的标识
   - Last-Modified：。。    //最后修改时间
@@ -367,9 +366,8 @@ username = aaa&password = 123
   - Connection : keep-alive
 
 - 响应空行  ： 一个换行
+
 - 响应体： 资源文件 
-
-
 
 响应行：请求方式  HTTP/版本号  状态码 状态描述
 
@@ -380,8 +378,6 @@ username = aaa&password = 123
 - 304  请求支援未发生变化，使用缓存
 - 404 请求资源未找到
 - 500 服务器错误
-
-
 
 响应头
 
@@ -416,9 +412,9 @@ web_test1项目
 在web.xml 文件中，
 
 > <welcaome-file-list>
->
-> ​		<welcaome-file>/news/news.html</welcome-file>// news目录在web目录下
->
+> 
+> ​        <welcaome-file>/news/news.html</welcome-file>// news目录在web目录下
+> 
 > </welcome-file-list>
 
 ## 发布动态资源
@@ -428,6 +424,7 @@ web_test1项目
 - servlet是运行在java服务器上的程序，用于接收和相应来自客户端基于http协议的请求
 
 - 如果想实现servlet饿得 功能，可以通过实现javax.servlet.Servlet 接口或者继承他的实现类
+
 - 核心方法：service（） ，任何客户端的请求都会经过这个方法
 
 ### servlet快速入门发布动态资源
@@ -447,9 +444,9 @@ web_text2
 修改默认主页
 
 > <welcome-file-list>
->
-> ​	<welcome-file>/html/frame.html</welcome-file>
->
+> 
+> ​    <welcome-file>/html/frame.html</welcome-file>
+> 
 > </welcome-file-list>
 
 在src目录下：
@@ -474,21 +471,21 @@ public class StudentServlet extends Servlet{
 //servlet 的声明
 
 > <servlet>
->
-> ​	<servlet-name> sutdentServlet</servlet-name>
->
+> 
+> ​    <servlet-name> sutdentServlet</servlet-name>
+> 
 > <serlet-class>com.itcast.servlet.StudentServlet</servlet-class>
->
+> 
 > </servlet>
 
 //servlet的映射
 
 > <servlet-mapping>
->
-> ​	<servlet-name>studentServlet</servlet-name>
->
-> <url-pattern>/srudentServlet<url-pattern>	
->
+> 
+> ​    <servlet-name>studentServlet</servlet-name>
+> 
+> <url-pattern>/srudentServlet<url-pattern>    
+> 
 > <servlet-mapping> 
 
 ### servlet执行流程
@@ -537,8 +534,6 @@ getServletInfo方法
 5. 部署并启动项目
 6. 通过浏览器测试
 
-
-
 GenericSerlvet 和 HttpServlet 均是抽象方法，不过大部分类已经实现了
 
 项目servlet_demo1
@@ -559,7 +554,6 @@ public class ServletDemo01 extends GenericServlet{
 - servlet_demo1 
 - web.xml
 - servletDemo01类
-
 1. 发起请求
 2. 解析地址
 3. 找到对应的应用
@@ -620,15 +614,13 @@ service方法的作用相同，仍然为相应客户端请求，但是遇到get�
 
 死亡对应的是destroy方法
 
-
-
 结论： Servlet对象只会创建一次，销毁一次，所以Servlet对象只有一个实例。如果一个对象实例在应用中格式唯一的存在，那么我们就称他为单例模式
 
 ### Servlet线程安全问题
 
 模拟用户登录功能来查看Servlet线程是否安全
 
-1.  定义一个用户名的成员变量
+1. 定义一个用户名的成员变量
 2. 获取用户名
 3. 将用户名相应给服务器
 
@@ -666,33 +658,32 @@ ServletDemo05
 ```xml
 <!-- 指定名称的方式-->
 <servlet>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <servlet-class>com.itheima.servlet.ServletDemo05</servlet-class>
 </servlet>
 <servlet-mapping>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <url-pattern>/servletDemo05</url-pattern>
 </servlet-mapping>
 
 <!-- /开头 + 通配符 -->
 <servlet>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <servlet-class>com.itheima.servlet.ServletDemo05</servlet-class>
 </servlet>
 <servlet-mapping>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <url-pattern>/servlet/*</url-pattern>// 目录前面只要是/servlet/，后面是什么都无所谓了
 </servlet-mapping>
 <!--通配符 + 固定格式结尾 -->
 <servlet>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <servlet-class>com.itheima.servlet.ServletDemo05</servlet-class>
 </servlet>
 <servlet-mapping>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <url-pattern>*.do</url-pattern>//路径最后的部分只要是以.do结尾，最后部分其他的写的啥不重要，路径只要是找对项目了，路径也随意
 </servlet-mapping>
-
 ```
 
 配置的优先级问题： 越是具体的优先级越高，越是模糊的通用的优先级越低。
@@ -716,31 +707,30 @@ ServletDemo06
 1. 定义一个商品金额
 
 2. 获取访问资源路径
-
+   
    > String path = req.getRequestURI();
-   >
+   > 
    > path = path.substring(path.lastIndexOf("/"));
 
 3. 条件判断
-
+   
    > if("/vip".equals(path)){
-   >
-   > ​	System.out.print("商品原价为：" + money + "优惠后： " +(money*0.9));
-   >
+   > 
+   > ​    System.out.print("商品原价为：" + money + "优惠后： " +(money*0.9));
+   > 
    > }
 
 多映射配置：
 
 ```xml
 <servlet>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <servlet-class>com.itheima.servlet.ServletDemo05</servlet-class>
 </servlet>
 <servlet-mapping>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <url-pattern>/itheima/*</url-pattern>
 </servlet-mapping>
-
 ```
 
 ### Servlet创建时机
@@ -797,23 +787,20 @@ ServletConfig是Servlet的配置参数对象，在Servelet规范中，允许为�
 
 要是配置多个参数值，需要写多个init-param 标签
 
- 
-
 ```xml
 <servlet>
-	<servlet-name>servletDemo05</servlet-name>
+    <servlet-name>servletDemo05</servlet-name>
     <servlet-class>com.itheima.servlet.ServletDemo05</servlet-class>
     <init-param>
-    	<param-name>encoding</param-name>
+        <param-name>encoding</param-name>
         <param-value>UTF-8</param-value>
     </init-param>
     <init-param>
-    	<param-name>desc</param-name>
+        <param-name>desc</param-name>
         <param-value>This is ServletConfig</param-value>
     </init-param>
-    
-</servlet>
 
+</servlet>
 ```
 
 ### ServletConfig 的常用方法
@@ -835,7 +822,7 @@ public class ServeltDemo07{
         this.config = config;
     }
     protected void doGet(req,resp){
-         		//3.演示config的方法
+                 //3.演示config的方法
         String encodingValue = config.getInitParameterNames();
         while(keys.hasMoreElements()){
             String key = keys.next
@@ -845,7 +832,7 @@ public class ServeltDemo07{
             String name = config.getServletName();
             ServletContext context = Config.getServeltContext();
             System.out.pirntln(context);
-            
+
         }
     }
 }
@@ -881,22 +868,22 @@ ServletContext是应用上下文对象（应用域对象）。每一个应用中
 
 ```xml
 <web-app>
-	<context-param>
-    	<param-name>
+    <context-param>
+        <param-name>
             globalEncoding
         </param-name>//名字随便起
     </context-param>
     <param-value>
-    	UTF-8
+        UTF-8
     </param-value>
-    
+
     <context-param>
-    	<param-name>
+        <param-name>
             globalDesc
         </param-name>//名字随便起
     </context-param>
     <param-value>
-    	hello hello
+        hello hello
     </param-value>
 </web-app>
 ```
@@ -937,7 +924,6 @@ System.out.println(value);
 
 //删除共享数据
 context.removeAttribute("username");
-
 ```
 
 ### 8.注解开发
@@ -966,11 +952,11 @@ web.xml 文件虽然不需要了，但是WEB-INF文件夹还是很需要的，�
 //注解开发：
 @WebServlet("/serveltDemo01")
 public class ServletDemo01 extends HttpServelt{
-    
+
 }
 ```
 
-###  WebServlet注解 的详解
+### WebServlet注解 的详解
 
 注解的本质就是一个接口
 
@@ -983,7 +969,7 @@ public class ServletDemo01 extends HttpServelt{
 2. 重写doGet 和doPost
 
 3. 定义一个类，实现ServletContainerInittializer 接口
-
+   
    - 注册配置servlet的功能类
    - 完成Servlet的创建和配置
 
@@ -996,26 +982,26 @@ public class ServletDemo01 extends HttpServelt{
 7. 文件中的内容为：容器功能注册实现类的全类名
 
 8. 在容器功能注册实现类中onStartup方法中完成注册Servlet
-
-   >public void onStartup(..){
-   >
-   >​	//完成Servlet的创建和配置
-   >
-   >//1.创建ServletDemo02的对象
-   >
+   
+   > public void onStartup(..){
+   > 
+   > ​    //完成Servlet的创建和配置
+   > 
+   > //1.创建ServletDemo02的对象
+   > 
    >  ServletDemo02 servletDemo02 = new ServletDemo02();
-   >
-   >// 2. 在ServletContext对象中添加Servlet，并得到Serve两天的动态配置对象
-   >
-   >ServeltRegistration.Dynamic registration = servletContext.addServlet("ServeltDemo02",servletDemo02);
-   >
-   >//3.配置Servlet
-   >
-   >registration.addMapping("/servletDemo02");
-   >
-   >registration.setLoadOnStartup(1);//Servlet加载时机
-   >
-   >}
+   > 
+   > // 2. 在ServletContext对象中添加Servlet，并得到Serve两天的动态配置对象
+   > 
+   > ServeltRegistration.Dynamic registration = servletContext.addServlet("ServeltDemo02",servletDemo02);
+   > 
+   > //3.配置Servlet
+   > 
+   > registration.addMapping("/servletDemo02");
+   > 
+   > registration.setLoadOnStartup(1);//Servlet加载时机
+   > 
+   > }
 
 9. 部署并启动项目
 
@@ -1049,38 +1035,38 @@ public class ServletDemo01 extends HttpServelt{
         <button type = "submit">
             保存
         </button>
-        
+
     </form>
 </body>
 ```
 
 ```xml
 <welcome-file-list>
-	<welcome-file>
-    	/addStudents.html
+    <welcome-file>
+        /addStudents.html
     </welcome-file>
 </welcome-file-list>
 <servlet>
-	<servlet-name></servlet-name>
+    <servlet-name></servlet-name>
     <servlet-class></servlet-class>
 </servlet>
 <servlet-mapping>
-	<servlet-name></servlet-name>
+    <servlet-name></servlet-name>
     <url-pattern></url-pattern>
 </servlet-mapping>
 ```
 
-```java 
+```java
 doGet(req,resp){
     String username = req.getParameter("username");
     Stirng age = req.getParameter("age");
     String score = req.getParameter("score");
-    
+
     BufferedWriter bw = new BufferedWriter(new FileWriter("d:/stu.txt",true));
     bw.write(username + "," + age +"," + score);
     bw.newLine();
     bw.close();
-    
+
     //响应给客户端
     PrintWriter pw = resp.getWriter();
     pw.println("Save success");
@@ -1139,7 +1125,7 @@ String value = values.nextElement();
             String name = names.nextElement();
             String calue = req.getHeader(name); 
         }
-        
+
     }
 }
 ```
@@ -1197,18 +1183,18 @@ public class Student{
     private String username;
     private String password;
     private String[] hobby;
-    
-  	public Student(){
-        
+
+      public Student(){
+
     }
     public Student(Stirng username,Stirng password,String[] hobby){
         this.username = username;
         this.password = password;
         this.hobby = hobby;
     }
-    
+
     getter and setter;
-    
+
     public String toString(){
         return "Student{" +
             "username = "+username +..... 自动生成

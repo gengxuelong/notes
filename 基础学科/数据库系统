@@ -478,3 +478,588 @@ select count(sNo)
 from student;
 ```
 
+# 第四次课
+
+count() 函数，不计数null,重复的也计数
+
+distinct  消除重复
+
+
+
+查看当前总学分
+
+```sql
+select SUM(credit)
+from course;
+```
+
+查询某个学生所有课程的平均分
+
+```sql
+select sNo ,avg(scorce)
+from sc
+where sNo = '1701'
+```
+
+分组：group by  
+
+```sql
+select cNo count(*)
+from sc 
+group by cNo
+order by cNo;
+```
+
+选修人数大于10 的课程号 和选修人数
+
+对分组之后的数据进行限制用having
+
+```sql
+select cNo count(*)
+from sc
+group by cNo
+having count(*)>=10;
+```
+
+子查询：
+
+```sql
+select *
+from student
+where dNo = (
+	select dNo
+    from student
+    where sName = 'lihua';
+)
+```
+
+## 多表连接
+
+```sql
+通俗语法
+select *
+from r1,r2
+where r1.a = r2.b;
+//没有where时，会出现笛卡尔积
+ISO标准写法
+
+```
+
+```sql
+select first.cno,second.cpno
+from course first,course second
+where first.cpno = second.cno
+//自连接
+```
+
+自然连接：
+
+如果没有匹配的话，会导致丢失行的问题。
+
+外连接： 不会有任何丢失数据，无论匹配与否 左右两表的数据都会保留。
+
+```
+select s.*,sc.*
+from student s,sc sc
+where s.sno = sc.sno; //自然连接
+select s.*,sc.*
+from student s,sc sc
+where s.sno = sc.sno（*）; //左外连接。当没有匹配时，右边增加空行和左边匹配
+select s.* ,sc.*
+from student s
+left （outer） join sc sc
+on s.sno = sc.sno;//RSO标准语法，推荐。左外连接
+select table1.conlumn ,table2.column 
+from table1
+cross join table2 (笛卡尔积)
+natrual join table2（自然连接）
+join table2 using column_name
+join table2 on (条件)
+left/right/full outer join table2
+on (条件)
+```
+
+单表查询：
+
+分组和聚集函数
+
+多表查询-
+
+- 嵌套子查询
+- 连接查询
+
+逻辑表达正确性
+
+
+
+首先分析查询的结构和查询条件
+
+如果查询的结果和条件在一个关系中，则 简单，单表查询
+
+如果结果 和条件 在不同的关系中：
+
+- 子查询，在where子句中用子查询获得条件。不相关子查询，逻辑非常清晰，嵌套多层也应该会。
+- 连接
+
+如果我们要查询的结果本身来自于多个关系，条件又来自于另外关系：
+
+- 则不得不用到连接。
+- 把两个或者多个关系连接在一起。
+
+逻辑表达:
+
+level1: sql 能执行
+
+level2： SQL能执行，结果正确
+
+level3： SQL能执行，结果正确，逻辑还要正确。逻辑正确能保证SQL在不同平台上都能运行成功。同时分析效率。
+
+逻辑错误  但结果正确的案例：
+
+1. 查询选修了所有课程的学生姓名：
+
+自己不会，就查询了选修课程门数与当前所有课程门数相同的学生	（乾坤大挪移）
+
+exits 关键词
+
+```
+查询所有没选001 号课的学生姓名
+select sname
+from student
+where sno not in (
+	select sno 
+	from sc
+	where cno = '001'
+)
+
+select sname
+from student
+where not exists(
+	select * 
+	from sc
+	where sno = student.sno and sno = '001'
+) 在子查询中用到了student.sno 这个父查询的关系，子查询不能单独运行。只判断是否存在，不关系具体的赋值。所以exists前没有属性，查询的行也是用* 
+只能父查询和子查询顺序查询。
+对父查询的每一行，子查询都要扫描一遍
+
+select sno ,sname.sdept
+from student s1
+where exits (
+	select * form student s2
+	where s2.sdept = s1.sdept and s2.sname = '刘晨'
+);
+
+select sno ,sname 
+from student
+where dno = (
+select dno 
+from student
+where sname = '刘晨')
+in /not in  的子查询都是不相关的子查询，逻辑更加清晰。
+而exits /not exits 的子查询很多情况是相关子查询，逻辑比较复杂。
+有一些情况用in不能表达，而用exit能表达。
+```
+
+关系代数的除法，就是表示全称连词。
+
+SQL没有直接表示除法的语法
+
+全称量词可以表示为存在量词。
+
+存在量词既 exists ，
+
+任意x 有P   ==》 不存在x,使非P
+
+
+
+对于任何一门课，只要A选了，那么我也选了。
+
+```sql
+select sname 
+from student s
+where not exists(
+	select * 
+    from sc
+    
+)
+```
+
+只有关于全称量词 和 蕴含相关时的才用（not） exists。
+
+
+
+关于集合的运算：
+
+关系是结合。并交差适用
+
+针对关系的运算：
+
+选择、投影、连接、除法
+
+SQL语言中虽然支持并交差，但是后续开发中 一定要严禁并交差。不允许使用
+
+并：
+
+union
+
+将两个查询的结构 并交差在一起。对于关系：当且仅当列一样的时候才可以
+
+select 子句也可以放在from中。构成视图。后续会讲解
+
+课程只讲解大概。需要自主学习。
+
+
+
+insert：
+
+```sql
+insert into student (sno,sname)
+values()
+insert into student
+values () //不写类名，默认所有列名都写了。
+//插入查询结构
+create table s_score(
+	sno char(6),
+	sname varchar(20),
+	avg decimal(5,2)
+);
+insert into s_score(sno ,sname.avg)
+(
+	select s.sno,s.sname,v.avgscore
+	from student s,(
+		select sno,avg(acore) from sc group by sno)
+		as v(sno,avgscore)
+		where s.sno = v.sno
+	)
+);
+```
+
+
+
+update student 
+
+set age = 60
+
+where sno = '001';
+
+
+
+delete 
+
+from student
+
+where sno = '001';
+
+DML： insert  update    delete
+
+DDL: create    alter    drop
+
+DCL: grant 授权   revoke 撤销权限
+
+
+
+
+
+更新的一致性问题：
+
+update student 
+
+set dno  = '05'
+
+where sno = '170407';
+
+
+
+select * from department;
+
+插入的学生违反了外键约束。将直接报错。
+
+delete 
+
+from department 
+
+where dno = '01';
+
+报错，student表中 外键dno中有01 的学生。
+
+三种方案：
+
+- 级联student表中01 系的学生直接删除掉
+- 让01 系的学生的系更改为null
+- 直接不允许删除，报错阻止。默认
+
+在默认条件下如何删除系：
+
+先把系里的学生的系 更改为 null或其他
+
+update sudent 
+
+set dno = null
+
+where dno = '01';
+
+
+
+## 索引
+
+因为有管理开销，所有磁盘不能以位为单位，因为这样的话光是记录各个位是够被占用的管理信息就比可用信息大了。所以磁盘以块为单位分配存储空间。
+
+访问磁盘的时间开销：
+
+1. 寻找信息所在的磁道。寻道
+2. 旋转等待。
+3. 读取，时间可以忽略不计。
+
+针对一个表只能建立一个物理索引（簇索引）
+
+性别是最适合建立簇索引
+
+对于成绩，建立簇索引和一般索引都不恶化时
+
+使用B树和B+ 树
+
+
+
+所有的表都应该建立基于主键的主索引。
+
+基于其他数据项的副索引，使用B或B+ 树实现。
+
+基于值单一的项建立物理索引。
+
+```sql
+create unique index stuentId
+on student(sno);
+drop index indexName;
+```
+
+
+
+
+
+
+
+## 视图
+
+希望访问的数据在三个表中。
+
+视图仅仅是虚表
+
+把数据从基本表中拿出并重新组织一遍，形成视图。
+
+不能往视图中存储数据。
+
+用户访问SQL效率提高，更加便捷。但是访问效率并没有提高，略有下降，多了查询代码和视图代码拼接整合的步骤
+
+数据更加安全，只让用户有权访问视图，基本表中的无关数据无法再被访问。
+
+with check option
+
+
+
+
+
+## 事务控制
+
+account(id,balance)
+
+转账业务
+
+update account 
+
+set balance = balance -100
+
+where id = '01';
+
+update account 
+
+set ballance = balance +100
+
+where id = '02';
+
+
+
+默认将每条SQL语句当做一条事务
+
+在事务没有提价之前是可以提交的
+
+没有提交运行事务后也能看到结果，可以回滚到未改变前
+
+事务没有提交的时候其他用户是否可以看到改变呢？
+
+可以让看到 也可以不让看到
+
+postresql 默认每条SQL语句都是一个事务，语句前后隐形一个事务定义和事务提交
+
+Oracle是默认提交语句前的所有语句为一个大的事务。货主所运行的所有SQL认为是一个事务。
+
+
+
+
+
+
+
+## 完整性约束
+
+## 访问控制
+
+grant 
+
+
+
+## 触发器
+
+trigger and procedure
+
+
+
+
+
+## 数据库的安全性：
+
+数据库安全层次
+
+ 
+
+## 数据库应用设计：
+
+SQL和其他的高级程序语言结合使用
+
+- 将SQL作为函数的参数放入C语言
+- 直接将SQL语言引入到C语言
+
+
+
+通信区
+
+
+
+数据库系统 好好学，一定要保研呀；
+
+一定要提升自己的能力呀；
+
+争取找个女盆友呀
+
+
+
+
+
+ER模型向关系模型的衍射
+
+经过上两次课的讨论，
+
+数据需求，二义性，隐含需求
+
+将用户需求转化为关系模型
+
+数据库概念设计阶段，采用ER建模技术。
+
+得到概念模型。叫做实体联系模型
+
+对用户的数据需求加以重新表述。
+
+虽然能比较完整的表达用户的数据需求，但是没有办法直接放在数据库中取
+
+数据库中存的都是关系模型，
+
+如何把实体联系模型转换为关系模型呢
+
+如何把ER模型转换为关系模型
+
+要练习打字，提升打字速度啊
+
+那么上两次可讨论了衍射模式规范理论
+
+衍射方法并不是唯一的，并不是都是好的。
+
+两种极端： 都放在一张表中；每个属性都映射为一种关系。
+
+冗余，属性间的依赖关系完全丢失
+
+那些映射是好的，那些是不好的。
+
+关系模式规范化
+
+ 关系模式规范化，如何一步一步将关系模式改为满足三范式	
+
+理解明白了不代表能做，课后一定要经过实践，做大量的练习，
+
+自己给自己出一些练习，做老师的练习z
+
+在课程群中可以随时答疑
+
+关系模型中的联系只有一种： 关系
+
+假设，我们根据用户的数据需求，
+
+我们得到的ER模型非常简单，只有两个属性：
+
+学院和 学生。
+
+ER模型 转换为关系模型
+
+冗余容易造成增删改异常
+
+规范化满足第三范式的模式。
+
+我们一般最少要规范化到第三范式的程度
+
+在工程中，不能随便映射，让后在按规范化理论得到满足三范式的结果。
+
+在工程中，我们希望总结出一个方法，使得结果就直接满足三个范式、
+
+把每个实体性映射为一个关系，
+
+将副实体的主码作为主实体的外键
+
+当联系有属性时，则将联系映射为一个弱实体，
+
+通过弱实体，将一个二元关系转化为三元关系
+
+多对多的递归联系: 自己对自己
+
+其实就是多对多的二元联系
+
+新增加一个弱实体型，该弱实体型没有暂时没有属性
+
+新增加弱实体
+
+第一范式： 增加行，原主码消失，出现冗余，不好。
+
+将多值属性分离出去，构成一个弱实体型
+
+
+
+ER模型的强实体：
+
+将强实体映射为一个关系。
+
+弱实体，将弱实体也映射为一个关系，可能没有候选码
+
+弱实体，一定会跟强实体有联系的。
+
+两个强实体间一对多的二元联系：
+
+把一方实体作为父实体，将多方的实体作为子实体。
+
+
+
+一对一的联系：
+
+一方有可能部分参与，
+
+如果双方全部参与，那么就是严格的一行队一行，可以直接合并。不会产生负面影响
+
+如果一方全部参与，一方部分参与怎么办：
+
+不介意空值可以合并，
+
+把全部参与的一方作为父实体，把部分参与的一方作为子实体
+
+如果双方都是部分参与：
+
+员工 和 汽车
+
+随便选择一个作为主实体
+
+绝大部分员工都有车，员工的参与性强，则车的参与性弱，弱的一方为父实体
+
